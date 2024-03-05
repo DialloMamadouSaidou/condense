@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>Ma page daccueil</title>
+     {% load bootstrap5 %}
+     {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+</head>
+<body>
+<h3 class="text-white">hello mamadou saidou diallo</h3>
+
+<div class="myform">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="em1">
+                <input type="text" id="email" class="form_input1" name="email">
+                <label for="email" class="form_label1">Email</label>
+                <strong>{{ email }}</strong>
+        </div>
+        <div class="em2">
+                <input type="text" id="name" class="form_input2" name="name">
+                <label for="name" class="form_label2">Name</label>
+                <strong>{{ name }}</strong>
+        </div>
+        <div class="em4">
+            <select name="choix">
+                <option value="charge_crs">Charge_cours</option>
+                <option value="etudiant">Etudiant</option>
+                <option value="charger_td">Charger_td</option>
+                <option value="employer_bureau">Employer_bureau</option>
+            </select>
+        </div>
+        <div class="les2">
+            <div class="em3">
+                <input type="password" id="password" class="form_input3" name="password">
+                <label for="password" class="form_label3">Password</label>
+                <strong>{{ password }}</strong>
+                {% for item in bien %}
+                    <strong>{{ item }}</strong>
+                {% endfor %}
+            </div>
+            <div class="em4">
+                <input type="password" id="confirmation" class="form_input4" name="confirmation">
+                <label for="confirmation" class="form_label4">Confirmation</label>
+                <strong>{{ confirmation }}</strong>
+                <strong>{{ confirmations }}</strong>
+            </div>
+        </div>
+            <input type="submit" value="soumettre">
+    </form>
+</div>
+</body>
+</html>

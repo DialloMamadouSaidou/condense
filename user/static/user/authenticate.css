@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Cute+Font&display=swap');
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Cute Font", sans-serif;
+    font-size: 30px;
+    display: grid;
+    place-items: center;
+    height: 20rem;
+    background: #060b23;
+    box-sizing: border-box;
+    min-width: 200px;
+}
+.les2 {
+    display: flex;
+}
+.em2 {
+    align-items: center;
+}
+.em3, .em4 {
+    margin: 10px;
+}
+.form, .em1, .em2, .em3, .em4 {
+    position: relative;
+    width: 100%;
+}
+
+.em1, .em2 {
+    margin-bottom: 35px;
+}
+
+.form_input1, .form_input2, .form_input3, .form_input4{
+    margin-left: 15px;
+
+    background: none;
+    height: 55px;
+    padding: 10px;
+    outline: none;
+    border: 2px solid #e15eee;
+    border-radius: 15px;
+    cursor: text;
+    font-size: 25px;
+    color: #fff;
+}
+.form_input1, .form_input2 {
+    width: 800px;
+}
+.form_input3, .form_input4 {
+    width: 400px;
+}
+.form_label1, .form_label2, .form_label3, .form_label4{
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0 3px;
+    color: #fff;
+    font-size: 30px;
+    background: #060b23;
+}
+
+.form_input1:hover,
+.form_input2:hover,
+.form_input3:hover,
+.form_input4:hover{
+    border-color: #adffff;
+}
+
+.form_input1:valid ~ .form_label1,
+.form_input2:valid ~ .form_label2,
+.form_input3:valid ~ .form_label3,
+.form_input4:valid ~ .form_label4{
+    top: -25px;
+    left: 25px;
+}

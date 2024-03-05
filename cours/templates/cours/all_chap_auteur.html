@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>Chapitre dun auteur</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'cours/first_style.css' %}">
+</head>
+<body>
+        <h2>Les chapitres d'un auteur</h2>
+
+        {% for item in auteur %}
+                <hr class="line">
+                <h2 class="title text-bold">{{ item.module.name }}</h2>
+                <a href="{% url 'cours:create_lesson' ids=item.identifiant %}"><p>{{ forloop.counter }} ~ {{ item.name }} <strong class="name">{{ item.module.name }}</strong></p></a>
+
+        {% endfor %}
+
+</body>
+</html>
+
+<script type="text/javascript" src="{% static 'cours/jss/script_allchap_auteur.js' %}">
+
+</script>

@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>Create Lesson</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="stylesheet" href="{% static 'cours/first_style.css' %}">
+</head>
+<body>
+
+        <div class="head d-flex justify-content-between">
+            <h3>Création de Lesson</h3>
+            <a class="btn btn-primary" href="#">Retour</a>
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="text" placeholder="Nom de la leçon" id="name" name="name">
+            <label for="name">Name Lesson <strong>{{ name }}</strong></label>
+            
+            <textarea id="description" name="description" rows="2"></textarea>
+            <label for="description">Donnez une description de la lesson <strong>{{ description }}</strong></label>
+
+            <input type="file" name="image" id="image">
+            <label for="image">Choisir l'image du Cours <strong>{{ imageF }}</strong></label>
+
+            <input type="file" name="video" id="video">
+            <label for="video">Choisir la video de la lesson <strong>{{ videoF }}</strong></label>
+
+            <input type="file" name="pdf" id="pdf">
+            <label for="pdf">Choisir le pdf de la lesson <strong>{{ docF }}</strong></label>
+
+            <input type="submit" value="crée">
+        </form>
+</body>
+</html>
