@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import load_lesson, all_chap_auteur, create_lesson, create_chap, programme_view, chapitre_programme, Module, lessons_chapitre, load_the_lesson_in_chapitre
+from .views import choix_cours, load_lesson, all_chap_auteur, create_lesson, create_chap, programme_view, chapitre_programme, Module, lessons_chapitre, load_the_lesson_in_chapitre
 
 app_name = 'cours'
 
@@ -13,5 +13,6 @@ urlpatterns = [
     path('create_lesson/<str:ids>', create_lesson, name='create_lesson'),
     path('chapitre/<str:ids>', all_chap_auteur, name='chapitre_auteur'),
     path('load_lesson', load_the_lesson_in_chapitre, name='load_lesson'),
-    path('load/<str:ids>', load_lesson, name="load_lesson")
+    path('load/<str:ids>', load_lesson, name="load_lesson"),
+    path('choix', choix_cours, name="choix_cours")
 ]

@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge">
     <title>Ma page daccueil</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
      {% load bootstrap5 %}
      {% bootstrap_css %}
     {% bootstrap_javascript %}
-
+    <link rel="stylesheet" href="{% static 'user/createuser.css' %}">
 </head>
 <body>
-<h3 class="text-white">hello mamadou saidou diallo</h3>
+<h3 class="">hello mamadou saidou diallo</h3>
 
 <div class="myform">
     <form method="POST">
@@ -28,17 +29,27 @@
                 <strong>{{ name }}</strong>
         </div>
         <div class="em4">
-            <select name="choix">
+            <select name="choix" id="choix">
                 <option value="charge_crs">Charge_cours</option>
                 <option value="etudiant">Etudiant</option>
                 <option value="charger_td">Charger_td</option>
-                <option value="employer_bureau">Employer_bureau</option>
+                <option value="charger_financier">Charger_financier</option>
+                <option value="chef_departement">Chef_departement</option>
+                <option value="registraire">Registraire</option>
             </select>
+        </div>
+        <div class="programme">
+            {% for item in all %}
+            <label>
+                <input type="radio" name="option" value="{{ item.name }}">
+                {{ item.name }}
+            </label><br>
+            {% endfor %}
         </div>
         <div class="les2">
             <div class="em3">
                 <input type="password" id="password" class="form_input3" name="password">
-                <label for="password" class="form_label3">Password</label>
+                <label for="password" class="form_label3">Password</label></br>
                 <strong>{{ password }}</strong>
                 {% for item in bien %}
                     <strong>{{ item }}</strong>
@@ -56,3 +67,4 @@
 </div>
 </body>
 </html>
+<script type="text/javascript" src="{% static 'jss/script_create.js' %}"></script>

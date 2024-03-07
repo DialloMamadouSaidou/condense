@@ -4,6 +4,8 @@ from random import choice
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
+#from cours.models import Programme
+
 # Create your models here.
 
 class MyUserManager(BaseUserManager):
@@ -57,6 +59,9 @@ class Profile(models.Model):
 
     #choices = models.CharField(max_length=90, choices=choix, blank=False)
     choices = models.CharField(max_length=90, blank=True)
+    domaine_programme = models.CharField(max_length=50, blank=True)#cette colonne me permettra
+    #dajouter le programme auquel letudiant ou le charger de cours doit enseigner
+    #qui sera géré au niveau de la création de lutilisateur
 
     def save(self, *args, **kwargs):
        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(3)]) + trois_element(self.user.name)

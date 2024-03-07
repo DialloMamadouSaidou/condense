@@ -167,6 +167,10 @@ def load_lesson(request, ids):
     except:
             print('La video de ce cours pas disponible')
     return render(request, 'cours/load_lesson.html', context={'title': title, 'description': description})
+#Remarque pour cette vue on il manque la redirection pour la lecture dela page html
+#quand l'utilisateur clique sur l'icone du pdf
+
+
 
 def load_the_lesson_in_chapitre(request):
 
@@ -179,5 +183,12 @@ def load_the_lesson_in_chapitre(request):
     ~Et aussi penser à configurer la page pour que chaque personne voit ses choix
 """
 
+#Dans le choix des cours ou des modules à étudiés en fonction de son domaine lutilisateur
+#choisir ces cours de façon personnel ou en tenant compte de son cycle
+
+
 def choix_cours(request):
-    pass
+    if request.user.is_authenticated and request.user.profile.choices == "etudiant":
+        return HttpResponse("<h2>Bienvenu à la page de choix de vos cours </h2>")
+
+    return HttpResponse("<h1>Vous ne pouvez pas faire de choix de cours car vous n'êtes pas etudiant</h1>")

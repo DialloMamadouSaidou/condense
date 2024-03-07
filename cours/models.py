@@ -123,9 +123,14 @@ class Note(models.Model):
         verbose_name = 'note'
         ordering = ['note']
 
-#class Commentaire(models.Model):
-#    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
-#   content = models.CharField(max_length=500, blank=False)
+#Une table pour le choix Où un etudiant pourra chosir ses cours en fonctions de ses besoins
+#Et surtout en fonction de son domaine
 
-#    def save(self, *args, **kwargs):
-    #    pass
+class Commentaire(models.Model):
+    identifiant = models.CharField(max_length=20, blank=True)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    content = models.CharField(max_length=500, blank=False)
+
+    def save(self, *args, **kwargs):
+        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(5)]) + '-' + trois_element(self.user.email)
+        super().save(*args, **kwargs)

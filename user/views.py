@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 
 from .models import MyUser, Profile
+from cours.models import Programme
 # Create your views here.
 
 
@@ -73,6 +74,7 @@ class ControlPassword:
 
 #
 def createuser(request):
+    all_programme = Programme.objects.all()
     if request.method == 'POST':
         context_empty, context_password = {},{} #Ce sont des dict pour verifier si les données sont rempli ou pas, et le dict
         mykey = [] #verfier la qualite du mpt de passe
@@ -111,15 +113,20 @@ def createuser(request):
                     return render(request, 'user/createuser.html', context={'bien': mykey})
                 else:
                     try:
-                        element = MyUser.objects.createuser(email=email, name=name, password=password)
-                        Profile.objects.create(user=element, choices=choix)
-                        return HttpResponse('<h3>Excellent mot de passe qui respecte tout les critères</h3>')
+
+                        if choix == 'charge_crs' or choix == 'etudiant':
+                            ids = "diallo"
+                            return redirect(request.path)
+                        else:
+                            element = MyUser.objects.createuser(email=email, name=name, password=password)
+                            Profile.objects.create(user=element, choices=choix)
+                            return HttpResponse('<h3>Excellent mot de passe qui respecte tout les critères</h3>')
                     except Exception:
                         return HttpResponse('<h2>Ce mail dutilisateur existe dejà</h2>')
 
         return HttpResponseRedirect(request.path)
 
-    return render(request, 'user/createuser.html')
+    return render(request, 'user/createuser.html', context={'all': all_programme})
 
 
 def authentification(request):
@@ -146,3 +153,12 @@ def vue_general(request): #La première page du site elle dois servir de page d'
 def deconnexion(request):
     logout(request)
     return redirect('user:general')
+
+
+def choix_du_programme(request, email, name, choix, password):
+    name, check = '', ''
+    all = Programme.objects.all()
+    if request.method == "POST":
+        name = request.POST.get('option')
+        print(name)
+    return render(request, 'user/choix_programme.html', context={'all': all})
