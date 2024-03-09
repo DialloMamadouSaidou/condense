@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import choix_du_programme, createuser, vue_general, authentification, deconnexion
+from .views import  createuser, vue_general, authentification, deconnexion
 
 app_name = 'user'
 urlpatterns = [

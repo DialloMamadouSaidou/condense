@@ -8,6 +8,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class MyUserManager(BaseUserManager):
 
     def createuser(self, email, name, password):
@@ -30,12 +31,15 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+
 def trois_element(element):
     if len(element) > 3:
         return element[:3]
 
     else:
         return element
+
+
 class MyUser(AbstractBaseUser):
     email = models.EmailField(blank=False, unique=True, max_length=50)
     name = models.CharField(blank=True, max_length=50)
@@ -47,11 +51,13 @@ class MyUser(AbstractBaseUser):
     USERNAME_FIELD = 'email'
 
     objects = MyUserManager()
+
     def has_perm(self, perm, obj=None):
         return True
 
     def has_module_perms(self, app_label):
         return True
+
 
 class Profile(models.Model):
     identifiant = models.CharField(max_length=15, blank=True, unique=True)
@@ -70,4 +76,9 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.name
+
+"""
+    Le domaine_programme concerne le prof charger du cours et letudiant
+    le domaine_module concerne le prof, le charger_td et letudiant.
+"""
 

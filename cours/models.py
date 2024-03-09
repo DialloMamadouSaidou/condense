@@ -36,7 +36,7 @@ def trois_element(element):
         return element[:3]
 
     return element
-class Programme(models.Model):
+class Programme(models.Model):#Programme
     identifiant = models.CharField(unique=True, max_length=50, blank=True)
     name = models.CharField(max_length=50, blank=False, unique=True)
     dp = models.OneToOneField(Profile, on_delete=models.SET_NULL, null=True, verbose_name='directeur_programme')
@@ -53,12 +53,14 @@ class Programme(models.Model):
         self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(3)]) + '-' + trois_element(self.name)
         super().save(*args, **kwargs)
 
+
 class module(models.Model): #Matiere
     identifiant = models.CharField(max_length=110, unique=True, blank=True)
     name = models.CharField(max_length=100, unique=True)
     groupe = models.PositiveIntegerField()
     charge_crs = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     programme = models.ForeignKey(Programme, on_delete=models.SET_NULL, null=True, blank=True)
+    price = models.CharField(max_length=9, blank=True)
 
     class Meta:
         verbose_name = 'Module'
@@ -71,7 +73,8 @@ class module(models.Model): #Matiere
         self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(3)]) + '-' + self.name
         super().save(*args, **kwargs)
 
-class Chapitre(models.Model):
+
+class Chapitre(models.Model):#Chapitre
     identifiant = models.CharField(max_length=200, unique=True, blank=True)
     name = models.CharField(max_length=200, unique=True)
     module = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
@@ -88,7 +91,7 @@ class Chapitre(models.Model):
         super().save(*args, **kwargs)
 
 
-class Lesson(models.Model):
+class Lesson(models.Model):#Lesson
     identifiant = models.CharField(max_length=30, blank=True, unique=True)
     auteur = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     chapitre = models.ForeignKey(Chapitre, on_delete=models.SET_NULL, null=True)
@@ -106,8 +109,10 @@ class Lesson(models.Model):
     def __str__(self):
         return f'{self.name}~{self.auteur}'
 
+#Elle va entrez en action lorque l'etudiant choisira ces cours.
 
-class Note(models.Model):
+
+class Note(models.Model):#Note
     identifiant = models.CharField(max_length=100, blank=True, unique=True)
 
     etudiant = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
@@ -126,6 +131,7 @@ class Note(models.Model):
 #Une table pour le choix Où un etudiant pourra chosir ses cours en fonctions de ses besoins
 #Et surtout en fonction de son domaine
 
+
 class Commentaire(models.Model):
     identifiant = models.CharField(max_length=20, blank=True)
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
@@ -134,3 +140,23 @@ class Commentaire(models.Model):
     def save(self, *args, **kwargs):
         self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(5)]) + '-' + trois_element(self.user.email)
         super().save(*args, **kwargs)
+
+#Choix_du_cours_Pour_letudiant && aussi du module pour le prof && aussi du td
+
+
+class Choix_Cours(models.Model):
+    identifiant = models.CharField(max_length=10, unique=True, blank=True)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    cours = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.user.email} ~ {self.cours.name} ~ {self.identifiant}"
+
+    class Meta:
+        verbose_name = 'COURS&Etudiant'
+        verbose_name_plural = 'COURS&Etudiants'
+        unique_together = ('cours', 'user')
+
+    def save(self, *args, **kwargs):
+        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(5)]) + '-' + trois_element(self.name)
+        super().save(*args, *kwargs)

@@ -20,12 +20,12 @@
         {% csrf_token %}
         <div class="em1">
                 <input type="text" id="email" class="form_input1" name="email">
-                <label for="email" class="form_label1">Email</label>
+                <label for="email" class="form_label1">Email</label></br>
                 <strong>{{ email }}</strong>
         </div>
         <div class="em2">
                 <input type="text" id="name" class="form_input2" name="name">
-                <label for="name" class="form_label2">Name</label>
+                <label for="name" class="form_label2">Name</label></br>
                 <strong>{{ name }}</strong>
         </div>
         <div class="em4">
@@ -45,7 +45,9 @@
                 {{ item.name }}
             </label><br>
             {% endfor %}
+
         </div>
+        <p>{{ entre }}</p>
         <div class="les2">
             <div class="em3">
                 <input type="password" id="password" class="form_input3" name="password">

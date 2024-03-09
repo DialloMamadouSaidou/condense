@@ -148,6 +148,8 @@ def create_lesson(request, ids):#Pour creer une lesson
 #Pour lire une lesson
 #Mais en tenant compte aussi de la succession des lessons genre en passant au suivant ou en revenant en arrière.
 #pdf de la lesson dois contenir dans une page unique pour voir lentiereté
+
+
 def load_lesson(request, ids):
     element = Lesson.objects.get(identifiant=ids)
     title = element.name
@@ -172,9 +174,21 @@ def load_lesson(request, ids):
 
 
 
+
 def load_the_lesson_in_chapitre(request):
 
     return render(request, 'cours/load_lesson_with_video.html')
+
+##Vue pour l'espace de chaque membre
+
+
+def vue_user(request, domaine):
+    if domaine == 'charge_cours':
+        mes_taches_obligatoires = ["Creer un chapitre", "Créer une leçon", "Creer un td"]
+        mes_taches_facultatifs = ["creez_une_evaluation", "Creation du groupe", "Crée une evaluation/travail_groupe", "Mettre une option de dépôt"]
+        context_etudiant = {'obligatoires': mes_taches_obligatoires, 'facultatif': mes_taches_facultatifs}
+        return render(request, 'cours/cours_vue_user.html', context=context_etudiant)
+    return render(request, 'cours/cours_vue_user.html', context={'element': domaine})
 #######################################################################################################################
 """
     Pour l'etudiant:
