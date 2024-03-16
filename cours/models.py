@@ -57,7 +57,6 @@ class Programme(models.Model):#Programme
 class module(models.Model): #Matiere
     identifiant = models.CharField(max_length=110, unique=True, blank=True)
     name = models.CharField(max_length=100, unique=True)
-    groupe = models.PositiveIntegerField()
     charge_crs = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     programme = models.ForeignKey(Programme, on_delete=models.SET_NULL, null=True, blank=True)
     price = models.CharField(max_length=9, blank=True)
@@ -147,16 +146,18 @@ class Commentaire(models.Model):
 class Choix_Cours(models.Model):
     identifiant = models.CharField(max_length=10, unique=True, blank=True)
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    cours = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
+    cours = models.CharField(max_length=500)
+    groupe = models.PositiveIntegerField(default=1)
+    date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.email} ~ {self.cours.name} ~ {self.identifiant}"
+        return self.identifiant
 
     class Meta:
         verbose_name = 'COURS&Etudiant'
         verbose_name_plural = 'COURS&Etudiants'
-        unique_together = ('cours', 'user')
+
 
     def save(self, *args, **kwargs):
-        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(5)]) + '-' + trois_element(self.name)
-        super().save(*args, *kwargs)
+        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(5)])
+        super().save(*args, **kwargs)

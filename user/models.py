@@ -66,6 +66,7 @@ class Profile(models.Model):
     #choices = models.CharField(max_length=90, choices=choix, blank=False)
     choices = models.CharField(max_length=90, blank=True)
     domaine_programme = models.CharField(max_length=50, blank=True)#cette colonne me permettra
+    pai = models.CharField(max_length=10, blank=True)
     #dajouter le programme auquel letudiant ou le charger de cours doit enseigner
     #qui sera géré au niveau de la création de lutilisateur
 
@@ -75,7 +76,7 @@ class Profile(models.Model):
        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.user.name
+        return self.user.email
 
 """
     Le domaine_programme concerne le prof charger du cours et letudiant

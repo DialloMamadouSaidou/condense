@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>Choix de cours</title>
+    <link rel="stylesheet" href="{% static 'cours/first_style.css' %}">
+</head>
+<body>
+        <h3>Hello Mamadou Saidou Bienvenue dans votre choix de cours.</h3>
+        <h2>Vous pouvez faire vos choix de cours ici</h2>
+        <form method="POST">
+            {% csrf_token %}
+                {% for item in module_choices %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ item.name }}" id="{{ item.identifiant }}" name="option">
+                            <label class="form-check-label" for="{{ item.identifiant }}">
+                                {{ item.name }}
+                            </label>
+                        </div>
+                {% endfor %}
+
+                {% for item in module_choice %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ item.name }}" id="{{ item.identifiant }}" name="option">
+                            <label class="form-check-label" for="{{ item.identifiant }}">
+                                {{ item.name }}
+                            </label>
+                        </div>
+                {% endfor %}
+
+            <p>{{ error }}</p>
+            <p>{{ well }}</p>
+            <input type="submit" value="soumettre">
+        </form>
+</body>
+</html>

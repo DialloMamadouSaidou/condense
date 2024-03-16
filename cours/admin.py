@@ -21,7 +21,8 @@ class Lesson(admin.ModelAdmin):
 class Module(admin.ModelAdmin):
     list_display = (
         'name',
-        'identifiant'
+        'identifiant',
+        'price'
     )
 
 @admin.register(Note)
@@ -37,4 +38,12 @@ class Chapitre(admin.ModelAdmin):
     list_display = (
         'name',
         'module'
+    )
+
+@admin.register(Choix_Cours)
+class ChoixCours(admin.ModelAdmin):
+    list_display = (
+        'identifiant',
+        'user',
+        'date'
     )

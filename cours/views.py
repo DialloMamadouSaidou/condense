@@ -2,11 +2,13 @@ from pprint import pprint
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.core.mail import send_mail
 
 from user.models import MyUser, Profile
 
-from .models import Programme, Chapitre, module, Lesson
+from .models import Programme, Chapitre, module, Lesson, Choix_Cours
 from .fonction import file_verify
+
 
 # Create your views here.
 """
@@ -46,6 +48,7 @@ def lessons_chapitre(request, ids):  ##Pour afficher les lessons contenu dans un
 
 #######################################################################################################################
 #Sa concerne le professeur
+
 
 def all_chap_auteur(request, ids):  # Pour tout les chapitres crées par un auteur
     liste_content = []
@@ -170,9 +173,7 @@ def load_lesson(request, ids):
             print('La video de ce cours pas disponible')
     return render(request, 'cours/load_lesson.html', context={'title': title, 'description': description})
 #Remarque pour cette vue on il manque la redirection pour la lecture dela page html
-#quand l'utilisateur clique sur l'icone du pdf
-
-
+#when user click on the pdf icon
 
 
 def load_the_lesson_in_chapitre(request):
@@ -181,15 +182,24 @@ def load_the_lesson_in_chapitre(request):
 
 ##Vue pour l'espace de chaque membre
 
+#Pas achevé cette vue
+
 
 def vue_user(request, domaine):
     if domaine == 'charge_cours':
-        mes_taches_obligatoires = ["Creer un chapitre", "Créer une leçon", "Creer un td"]
-        mes_taches_facultatifs = ["creez_une_evaluation", "Creation du groupe", "Crée une evaluation/travail_groupe", "Mettre une option de dépôt"]
-        context_etudiant = {'obligatoires': mes_taches_obligatoires, 'facultatif': mes_taches_facultatifs}
+        obligation = ["Create a chapter", "Create a lesson", "Create a td"]
+        facultatifs = ["create an evaluation", "Create a group", "Create an evaluation/group work", "Put a deposit option"]
+        context_etudiant = {"obligatoires": obligation, "facultatif": facultatifs}
         return render(request, 'cours/cours_vue_user.html', context=context_etudiant)
+    elif domaine == "charger_financier":
+        obligation = ["Payé/Etudiant", "Non_payé/Etudiant", "Payé/Prof", "Not Paie/Prof"]
+
+        context_finance = {'obligation': obligation}
+        return render(request, 'cours/cours_vue_user.html', context=context_finance)
     return render(request, 'cours/cours_vue_user.html', context={'element': domaine})
+#Pause de développement pour finir d'abord avec le choix de cours pour les étudiants.
 #######################################################################################################################
+
 """
     Pour l'etudiant:
     ~Cette partie contiendra le choix de son programme
@@ -198,11 +208,51 @@ def vue_user(request, domaine):
 """
 
 #Dans le choix des cours ou des modules à étudiés en fonction de son domaine lutilisateur
-#choisir ces cours de façon personnel ou en tenant compte de son cycle
+#choose courses personnally ou en tenant compte de son cycle
 
 
 def choix_cours(request):
     if request.user.is_authenticated and request.user.profile.choices == "etudiant":
-        return HttpResponse("<h2>Bienvenu à la page de choix de vos cours </h2>")
+        #print(request.user.profile.domaine_programme)
+        all_choices = [] #recupéré tout les choix d'un utilisateur
+        val1 = ''
+        context_modules = {}
+        domaine = request.user.profile.domaine_programme.title()
+        module_choices_name = module.objects.filter(programme__name=domaine)
+        email = request.user.email
+        all_element = Choix_Cours.objects.filter(user__user__email=email)
+        print(len(all_element))
+        for item in all_element:
+            item.cours = eval(item.cours)
+            all_choices.extend(item.cours)#Documentantion au niveau du document note.txt
+
+        all_choices = list(set(all_choices))
+        #pprint(all_choices)
+        user = Profile.objects.get(user__email=email)
+        #print(user.user.email)
+        context_module = {'module_choices': module_choices_name}
+        if request.method == "POST":
+            val1 = request.POST.getlist('option')
+            for item in val1:
+                pass
+
+            if len(val1) == 0:
+                context_module['error'] = "Vous devrez donnez au moins un choix"
+                return render(request, 'cours/choix_cours.html', context=context_module)
+
+            else:
+                context_error = []
+                for item in val1:
+                    if item in all_choices:
+                        context_error.append(item)
+
+                if len(context_error) > 0:
+                    pass
+                #element = Choix_Cours.objects.filter(user__email=email)
+                #Choix_Cours.objects.create(user=user, cours=val1, groupe=1)
+                return redirect(request.path)
+
+            return redirect(request.path)
+        return render(request, 'cours/choix_cours.html', context=context_module)
 
     return HttpResponse("<h1>Vous ne pouvez pas faire de choix de cours car vous n'êtes pas etudiant</h1>")
