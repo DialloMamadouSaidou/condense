@@ -22,13 +22,16 @@ class Module(admin.ModelAdmin):
     list_display = (
         'name',
         'identifiant',
-        'price'
+        'price',
+        'charge_crs'
     )
 
 @admin.register(Note)
 class Note(admin.ModelAdmin):
     list_display = (
         'identifiant',
+        'etudiant',
+        'module',
         'note',
 
     )

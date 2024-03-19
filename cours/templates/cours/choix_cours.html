@@ -16,26 +16,26 @@
         <h2>Vous pouvez faire vos choix de cours ici</h2>
         <form method="POST">
             {% csrf_token %}
-                {% for item in module_choices %}
+                {% for item in module_choices_name %}
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="{{ item.name }}" id="{{ item.identifiant }}" name="option">
-                            <label class="form-check-label" for="{{ item.identifiant }}">
-                                {{ item.name }}
+                            <input class="form-check-input" type="checkbox" value="{{ item }}" name="option">
+                            <label class="form-check-label">
+                                {{ item|title }}
                             </label>
                         </div>
                 {% endfor %}
 
-                {% for item in module_choice %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="{{ item.name }}" id="{{ item.identifiant }}" name="option">
-                            <label class="form-check-label" for="{{ item.identifiant }}">
-                                {{ item.name }}
+                {% for item in not_choice %}
+                    <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ item }}" name="option" disabled>
+                            <label class="form-check-label">
+                                {{ item|title }}
                             </label>
-                        </div>
+                    </div>
                 {% endfor %}
-
             <p>{{ error }}</p>
             <p>{{ well }}</p>
+            <p>{{ good }}</p>
             <input type="submit" value="soumettre">
         </form>
 </body>

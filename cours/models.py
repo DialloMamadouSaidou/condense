@@ -2,6 +2,7 @@ import string
 from random import choice
 
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from user.models import Profile
 
@@ -116,17 +117,19 @@ class Note(models.Model):#Note
 
     etudiant = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     module = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
-    note = models.PositiveIntegerField()
-    commentaire = models.CharField(max_length=500, default='bon eleve')
+    note = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(20)])
+    commentaire = models.CharField(max_length=500, default='')
 
     def save(self, *args, **kwargs):
-        self.identifiant = self.etudiant.name + self.module.name
+        self.identifiant = self.etudiant.user.name + self.module.name
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'note'
         ordering = ['note']
 
+    def __str__(self):
+        return f"{self.etudiant} {self.module}"
 #Une table pour le choix Où un etudiant pourra chosir ses cours en fonctions de ses besoins
 #Et surtout en fonction de son domaine
 

@@ -1,12 +1,13 @@
 from pprint import pprint
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 
 from user.models import MyUser, Profile
 
-from .models import Programme, Chapitre, module, Lesson, Choix_Cours
+from .models import Programme, Chapitre, module, Lesson, Choix_Cours, Note
 from .fonction import file_verify
 
 
@@ -184,18 +185,79 @@ def load_the_lesson_in_chapitre(request):
 
 #Pas achevé cette vue
 
-
+@login_required
 def vue_user(request, domaine):
     if domaine == 'charge_cours':
+        #Recupéré tout les étudiants inscrits sur ce cours
+        dico, dico1, dico2 = {}, {}, {}
+        liste_users, counter = {}, {} #counter comme son nom l'indique il comptera etudiant dans un module
+        liste_recupere, liste_user, liste, liste_set = [], [], [], []
+        #liste va me servir pour recuperer le nombre d'etudiant inscrit dans un cours
+        all_choix = Choix_Cours.objects.all()
+        mail_user = request.user.email #je recupère le mail de l'enseignant connecté
+        all_choices = Choix_Cours.objects.all()
+        liste_recupere = [item.name for item in module.objects.all() if item.charge_crs.user.email == mail_user] #je recupère tout les modules du charger de cours
+        all_note = Note.objects.all()
+        mykey = [] #Cette liste servira à contenir toutes les clés de ma future table
+
+        for item in all_note:
+            mykey.append(item.module.name)
+
+        mykey = list(set(mykey))
+        for item in mykey:
+            dico1[item] = []
+
+
+        for item in all_choices:
+            item.cours = eval(item.cours) #je recupere la liste des cours
+            for element in item.cours:
+                if element in liste_recupere:
+                    liste.append(element)
+
+        liste_set = list(set(liste))
+
+        for item in liste_set:
+            dico[item] = []
+
+        for item in liste_set:
+            counter[item] = liste.count(item) #Pour compter le nombre d'etudiant d'une classe
+
+
+        for item in all_note:
+            if item.module.name in liste_recupere:
+                for element in dico1:
+                            if item.module.name == element:
+                                        dico1[element].append({item.etudiant.user.email: item.note})
+
+        for key, value in dico1.items():
+            print(f"{key}~{value}")
+
+        print("--"*25)
+        for item in all_choices: #jitere sur tout les élements de la table Choix_Cours
+            for element in item.cours: #J'itère sur les élements de cours
+                if element in liste_recupere: #Je verifie sur le cours appartient au modules enseignés par l'enseignant
+                                        for key in dico:
+                                                if key == element: #je verifie si la clé de mon dico est égal à mon element trouver
+                                                        dico[key].append(item.user.user.email)#j'ajoute cet élément dans mon dico
+
+        for key, value in dico.items():
+            print(key, value)
+        all_etudiant = ''
+        my_cours = ''
         obligation = ["Create a chapter", "Create a lesson", "Create a td"]
         facultatifs = ["create an evaluation", "Create a group", "Create an evaluation/group work", "Put a deposit option"]
-        context_etudiant = {"obligatoires": obligation, "facultatif": facultatifs}
+        #context_etudiant = {"obligatoires": obligation, "facultatif": facultatifs, "user": liste_user}
+        context_etudiant = {"dico": dico}
         return render(request, 'cours/cours_vue_user.html', context=context_etudiant)
+
     elif domaine == "charger_financier":
         obligation = ["Payé/Etudiant", "Non_payé/Etudiant", "Payé/Prof", "Not Paie/Prof"]
 
         context_finance = {'obligation': obligation}
         return render(request, 'cours/cours_vue_user.html', context=context_finance)
+
+    elif domaine == "etudiant":
+        return HttpResponse("Bienvenu je suis un étudiant !")
     return render(request, 'cours/cours_vue_user.html', context={'element': domaine})
 #Pause de développement pour finir d'abord avec le choix de cours pour les étudiants.
 #######################################################################################################################
@@ -212,47 +274,45 @@ def vue_user(request, domaine):
 
 
 def choix_cours(request):
+    liste1_contient, liste1_not = [], []
     if request.user.is_authenticated and request.user.profile.choices == "etudiant":
         #print(request.user.profile.domaine_programme)
         all_choices = [] #recupéré tout les choix d'un utilisateur
         val1 = ''
         context_modules = {}
         domaine = request.user.profile.domaine_programme.title()
-        module_choices_name = module.objects.filter(programme__name=domaine)
-        email = request.user.email
-        all_element = Choix_Cours.objects.filter(user__user__email=email)
-        print(len(all_element))
-        for item in all_element:
-            item.cours = eval(item.cours)
-            all_choices.extend(item.cours)#Documentantion au niveau du document note.txt
+        module_choices_name = module.objects.filter(programme__name=domaine)#il va me retourner le nom des modules en formats chaine de caractère dans un type django.models.query.set
+        module_choices_name = [item.name for item in module_choices_name]#j'ai converti le type de sorti en class list
+        email = request.user.email #Recuperer le mail de l'utilisateur pour mieux chercher son profil
+        all_element = Choix_Cours.objects.filter(user__user__email=email)#Pour retrouver tout les choix de mon  utilisateur dans ma BD
 
-        all_choices = list(set(all_choices))
-        #pprint(all_choices)
-        user = Profile.objects.get(user__email=email)
-        #print(user.user.email)
-        context_module = {'module_choices': module_choices_name}
+        for item in all_element: #le all_element est une liste qui contient que des strings
+            item.cours = eval(item.cours) #j'evalue les items de cet all_element pour les convertir facilement en liste
+            all_choices.extend(item.cours)#à chaque item retrouvé  je letend dans ma dictionnaire que javais déclaré
+
+        all_choices = list(set(all_choices)) #Pour chaque element  de ma liste je le set pour eviter la repetition, qui va retourner un set puis le list pour renvoyer une liste
+        user = Profile.objects.get(user__email=email)#il retourne l'utilisateur qui à le même profile
+
+        for item in module_choices_name:
+            if item in all_choices:
+                liste1_contient.append(item)
+            else:
+                liste1_not.append(item)
+
         if request.method == "POST":
             val1 = request.POST.getlist('option')
-            for item in val1:
-                pass
-
+            pprint(val1)
             if len(val1) == 0:
-                context_module['error'] = "Vous devrez donnez au moins un choix"
-                return render(request, 'cours/choix_cours.html', context=context_module)
+                context_modules['module_choices_name'] = liste1_not
+                context_modules['not_choice'] = liste1_contient
+                context_modules['error'] = "Vous devrez donnez au moins un choix"
+                return render(request, 'cours/choix_cours.html', context=context_modules)
 
             else:
-                context_error = []
-                for item in val1:
-                    if item in all_choices:
-                        context_error.append(item)
-
-                if len(context_error) > 0:
-                    pass
-                #element = Choix_Cours.objects.filter(user__email=email)
-                #Choix_Cours.objects.create(user=user, cours=val1, groupe=1)
+                Choix_Cours.objects.create(user=user, cours=val1, groupe=1)
                 return redirect(request.path)
 
             return redirect(request.path)
-        return render(request, 'cours/choix_cours.html', context=context_module)
+        return render(request, 'cours/choix_cours.html', context={'module_choices_name': liste1_not, 'not_choice': liste1_contient})
 
     return HttpResponse("<h1>Vous ne pouvez pas faire de choix de cours car vous n'êtes pas etudiant</h1>")
