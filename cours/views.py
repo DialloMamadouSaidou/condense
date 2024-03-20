@@ -190,7 +190,7 @@ def vue_user(request, domaine):
     if domaine == 'charge_cours':
         #Recupéré tout les étudiants inscrits sur ce cours
         dico, dico1, dico2 = {}, {}, {}
-        liste_users, counter = {}, {} #counter comme son nom l'indique il comptera etudiant dans un module
+        liste_users, counter = {}, {}   #counter comme son nom l'indique il comptera etudiant dans un module
         liste_recupere, liste_user, liste, liste_set = [], [], [], []
         #liste va me servir pour recuperer le nombre d'etudiant inscrit dans un cours
         all_choix = Choix_Cours.objects.all()
@@ -207,7 +207,6 @@ def vue_user(request, domaine):
         for item in mykey:
             dico1[item] = []
 
-
         for item in all_choices:
             item.cours = eval(item.cours) #je recupere la liste des cours
             for element in item.cours:
@@ -222,32 +221,36 @@ def vue_user(request, domaine):
         for item in liste_set:
             counter[item] = liste.count(item) #Pour compter le nombre d'etudiant d'une classe
 
-
         for item in all_note:
             if item.module.name in liste_recupere:
                 for element in dico1:
-                            if item.module.name == element:
-                                        dico1[element].append({item.etudiant.user.email: item.note})
+                    if item.module.name == element:
+                        dico1[element].append({item.etudiant.user.email: item.note})
 
-        for key, value in dico1.items():
-            print(f"{key}~{value}")
 
-        print("--"*25)
-        for item in all_choices: #jitere sur tout les élements de la table Choix_Cours
-            for element in item.cours: #J'itère sur les élements de cours
-                if element in liste_recupere: #Je verifie sur le cours appartient au modules enseignés par l'enseignant
-                                        for key in dico:
-                                                if key == element: #je verifie si la clé de mon dico est égal à mon element trouver
-                                                        dico[key].append(item.user.user.email)#j'ajoute cet élément dans mon dico
+        for item in all_choices:    #jitere sur tout les élements de la table Choix_Cours
+            for element in item.cours:  #J'itère sur les élements de cours
+                if element in liste_recupere:   #Je verifie sur le cours appartient au modules enseignés par l'enseignant
+                    for key in dico:
+                        if key == element: #je verifie si la clé de mon dico est égal à mon element trouver
+                            dico[key].append(item.user.user.email)#j'ajoute cet élément dans mon dico
 
-        for key, value in dico.items():
-            print(key, value)
-        all_etudiant = ''
-        my_cours = ''
+
+        """
+            Il ma aidé pour laffichage dans ma page html
+            for key, value in dico1.items():
+            if key == "Element de Programmation":
+                for item in value:
+                    for element in item:
+                        if element == "lamarana@gmail.com":
+                            for k, v in item.items():
+                                print(v) 
+        """
+
         obligation = ["Create a chapter", "Create a lesson", "Create a td"]
         facultatifs = ["create an evaluation", "Create a group", "Create an evaluation/group work", "Put a deposit option"]
         #context_etudiant = {"obligatoires": obligation, "facultatif": facultatifs, "user": liste_user}
-        context_etudiant = {"dico": dico}
+        context_etudiant = {"dico": dico, "dico1": dico1}
         return render(request, 'cours/cours_vue_user.html', context=context_etudiant)
 
     elif domaine == "charger_financier":

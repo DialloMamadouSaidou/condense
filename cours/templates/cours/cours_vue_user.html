@@ -79,6 +79,25 @@
             <tbody>
                 <tr>
                     <td>{{ item }}</td>
+
+                    {% with  sortir_boucle=False %} <!--Pour sortir de la boucle svte si l'element est trouvé -->
+                    {% for k, v in dico1.items %} <!--j\'itere sur mon dict qui contient mes notes -->
+                        {% if key == k %} <!--je verifie si l'element de mon dico des notes appartient aux etudiants du prof -->
+                                {% for it in v %} <!--Puis là j'itere sur la table des notes avec la clé -->
+                                    {% for vals in it %} <!--Je verifie pour chaque element de mon sous dico etudiant: note -->
+
+                                            {% if vals == item %} <!--Là je regarde si la clé du dico est l'etudiant concerné -->
+                                                {% with sortir_boucle=True %} <!--Pour sortir de cette grande boucle -->
+                                                    {% for ke, ve in it.items %} <!-- Jitere sur mon dic -->
+                                                    <td>{{ ve }}</td> <!-- Puis j'affiche ma note de sorti -->
+                                                    {% endfor %}
+                                                {% endwith %}
+                                            {% endif %}
+                                     {% endfor %}
+                                {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                    {% endwith %}
                     <td></td>
                 </tr>
             </tbody>

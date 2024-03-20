@@ -121,12 +121,14 @@ class Note(models.Model):#Note
     commentaire = models.CharField(max_length=500, default='')
 
     def save(self, *args, **kwargs):
-        self.identifiant = self.etudiant.user.name + self.module.name
+        self.identifiant = self.etudiant.user.email + '~' + self.module.name
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'note'
+        verbose_name_plural = "Note Etudiant"
         ordering = ['note']
+        unique_together = ('module', 'etudiant')
 
     def __str__(self):
         return f"{self.etudiant} {self.module}"
