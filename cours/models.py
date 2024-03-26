@@ -61,6 +61,7 @@ class module(models.Model): #Matiere
     charge_crs = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     programme = models.ForeignKey(Programme, on_delete=models.SET_NULL, null=True, blank=True)
     price = models.CharField(max_length=9, blank=True)
+    image_module = models.ImageField(upload_to='Image/module', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Module'

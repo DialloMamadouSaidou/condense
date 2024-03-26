@@ -1,4 +1,7 @@
+import io
 from pprint import pprint
+from PIL import Image, ImageEnhance
+from io import BytesIO
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -185,6 +188,9 @@ def load_the_lesson_in_chapitre(request):
 
 #Pas achevé cette vue
 
+def load_chapter(request):
+    pass
+
 @login_required
 def vue_user(request, domaine):
     if domaine == 'charge_cours':
@@ -198,13 +204,13 @@ def vue_user(request, domaine):
         all_choices = Choix_Cours.objects.all()
         liste_recupere = [item.name for item in module.objects.all() if item.charge_crs.user.email == mail_user] #je recupère tout les modules du charger de cours
         all_note = Note.objects.all()
-        mykey = [] #Cette liste servira à contenir toutes les clés de ma future table
+        liste_mykey = []  #Cette liste servira à contenir toutes les clés de ma future table
 
         for item in all_note:
-            mykey.append(item.module.name)
+            liste_mykey.append(item.module.name)
 
-        mykey = list(set(mykey))
-        for item in mykey:
+        liste_mykey = list(set(liste_mykey))
+        for item in liste_mykey:
             dico1[item] = []
 
         for item in all_choices:
@@ -260,7 +266,51 @@ def vue_user(request, domaine):
         return render(request, 'cours/cours_vue_user.html', context=context_finance)
 
     elif domaine == "etudiant":
-        return HttpResponse("Bienvenu je suis un étudiant !")
+        context = {}
+        module_image = []   #Les matières qui ont une photo d'image
+        module_not_image = []   #Les matières qui n'ont pas de photo
+        email_etudiant = request.user.email     #Je recupère le mail de mes users
+        liste_module = []
+        cours_etudiant = []     #Il recupère tout les cours auquels l'etudiant est inscrit
+        all_choix = Choix_Cours.objects.filter(user__user__email=email_etudiant)
+
+        for item in all_choix:
+            item.cours = eval(item.cours)
+            cours_etudiant.extend(item.cours)
+
+        for element in cours_etudiant:
+            liste_module.append(module.objects.get(name=element))   #Ici je recupère des instances.
+            price = module.objects.get(name=element)
+            print(price.price)
+
+        for item in liste_module:
+            if item.image_module:
+                """
+                with open(item.image_module.path, 'rb') as f:
+                    image = Image.open(f)   #Ouverture du fichier
+
+                    image = ImageEnhance.Brightness(image)
+                    image = image.enhance(2.0)
+                    image = ImageEnhance.Sharpness(image)
+                    image = image.enhance(1.6)
+
+                    #crée le binaire de limage modifiée
+                    buffer = BytesIO()
+
+                    image.save(buffer, format='jpeg')
+                    image.show()
+                    image_data = buffer.getvalue()
+
+                    item.image_module.save(item.name, BytesIO(image_data), save=True)
+                    """
+                module_image.append(item)
+
+                #print(image.show())
+            else:
+                module_not_image.append(item)
+                print(f"{item.name} n'a pas dimage!")
+        context = {'image': module_image, 'not_image': module_not_image}
+        return render(request, "cours/vue_etudiant/first_vue.html", context=context)
     return render(request, 'cours/cours_vue_user.html', context={'element': domaine})
 #Pause de développement pour finir d'abord avec le choix de cours pour les étudiants.
 #######################################################################################################################

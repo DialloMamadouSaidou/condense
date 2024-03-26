@@ -34,7 +34,7 @@ class ControlPassword:
         if index:
             self.said['majt'] = "Majuscule ajouté"
         else:
-            self.said['majf'] = "Ajouter une majuscule"
+            self.said['majf'] = "Ajouter au moins une majuscule"
         return self.said
 
     def digit(self):
@@ -46,7 +46,7 @@ class ControlPassword:
         if index:
             self.said['digt'] = "Merci pour l'ajout du nombre"
         else:
-            self.said['digf'] = "Veuillez ajouter un nombre"
+            self.said['digf'] = "Veuillez ajouter au moins un nombre"
 
         return self.said
     def isalnumcharacter(self):
@@ -58,7 +58,7 @@ class ControlPassword:
         if index:
             self.said['spect'] = "Caractère special ajouté"
         else:
-            self.said['specf'] = "Ajouter un caractère special"
+            self.said['specf'] = "Ajouter au moins une caractère special"
 
         return self.said
 
@@ -96,7 +96,7 @@ def createuser(request):
         for key, value in content.items():
             if value == '':
                 mykey.append(key)
-                context_empty[key] = f'veuillez ajouter {key}'
+                context_empty[key] = f'Veuillez entrez votre {key}'
 
         #Ce context_empty avec la clé all me permet d'ajouter les elements du programme dans ma page en cas d'erreur
         context_empty["all"] = all_programmes
@@ -105,8 +105,8 @@ def createuser(request):
                 return render(request, 'user/createuser.html', context=context_empty)
 
         elif len(context_empty) == 1:
-            if password != confirmation:
-                context_confirmation['confirmation'] = "Assurez vous de rentrez le meme mot de passe"
+            if password != confirmation:    #Ce context verifie si les mots de passeses entrés sont les mêmes
+                context_confirmation['confirmation'] = "Assurez vous d'avoir entré le même password"
                 context_confirmation['all'] = all_programmes
                 return render(request, 'user/createuser.html', context=context_confirmation)
 
@@ -121,17 +121,19 @@ def createuser(request):
 
                 #print(len(mykey))
                 if len(mykey) != 0:
-                    non_respect_password_contrainte['bien'] = mykey
+                    non_respect_password_contrainte['bien'] = mykey #il
                     non_respect_password_contrainte["all"] = all_programmes
+                    for key, val in non_respect_password_contrainte.items():
+                        print(key, val)
                     return render(request, 'user/createuser.html', context=non_respect_password_contrainte)
                 else:
                     try:
-                        if choix in ["charge_crs", "etudiant"] and other_choice is None:
+                        if choix in ["charge_cours", "etudiant"] and other_choice is None:
                             context_choix["all"] = all_programmes
                             context_choix["entre"] = "Veuillez entrez votre choix"
                             return render(request, 'user/createuser.html', context=context_choix)
 
-                        elif choix in ["charge_crs", "etudiant"] and other_choice is not None:
+                        elif choix in ["charge_cours", "etudiant"] and other_choice is not None:
                             element = MyUser.objects.createuser(email=email, name=name, password=password)
                             Profile.objects.create(user=element, choices=choix, domaine_programme=other_choice)
                             return HttpResponse("<h2>Bonne Initiative</h2>")

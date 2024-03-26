@@ -1,7 +1,3 @@
-console.log("Hello world! Comment vas tu ?");
-console.log("hello world");
-
-var index = 0;
 
 
 function cacheme(){

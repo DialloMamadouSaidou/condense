@@ -1,3 +1,13 @@
+"""
+from PIL import Image, ImageEnhance
+image = Image.open("/home/med/Documents/imagedir/_images/portrait.jpg")
+image = ImageEnhance.Brightness(image)
+image = image.enhance(1.0)
+image = ImageEnhance.Sharpness(image)
+image.enhance(2.6).show()
+"""
+
+
 
 class file_verify:
     def __init__(self, image, video, document):

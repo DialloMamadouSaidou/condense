@@ -2,8 +2,29 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
 </head>
 <body>
     <h2>hello Mamadou Saidou</h2>
+
+      <div class="row">
+      {% for item in image %}
+           <div class="col-md-4">
+                <h4>{{ item.name }}</h4>
+                <img src="{{ item.image_module.url }}" class="img-fluid" width="600">
+           </div>
+      {% endfor %}
+
+       {% for item in not_image %}
+         <div class="col-md-4">
+            <h4>{{ item.name }}</h4>
+         </div>
+       {% endfor %}
+    </div>
+
 </body>
 </html>
