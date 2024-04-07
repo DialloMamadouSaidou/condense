@@ -2,6 +2,7 @@ import string
 from random import choice
 
 from django.db import models
+from django.db.models import F
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from user.models import Profile
@@ -37,6 +38,8 @@ def trois_element(element):
         return element[:3]
 
     return element
+
+
 class Programme(models.Model):#Programme
     identifiant = models.CharField(unique=True, max_length=50, blank=True)
     name = models.CharField(max_length=50, blank=False, unique=True)
@@ -55,7 +58,7 @@ class Programme(models.Model):#Programme
         super().save(*args, **kwargs)
 
 
-class module(models.Model): #Matiere
+class module(models.Model):     #Matiere
     identifiant = models.CharField(max_length=110, unique=True, blank=True)
     name = models.CharField(max_length=100, unique=True)
     charge_crs = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
@@ -75,7 +78,7 @@ class module(models.Model): #Matiere
         super().save(*args, **kwargs)
 
 
-class Chapitre(models.Model):#Chapitre
+class Chapitre(models.Model):   #Chapitre
     identifiant = models.CharField(max_length=200, unique=True, blank=True)
     name = models.CharField(max_length=200, unique=True)
     module = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
@@ -120,6 +123,7 @@ class Note(models.Model):#Note
     module = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
     note = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(20)])
     commentaire = models.CharField(max_length=500, default='')
+
 
     def save(self, *args, **kwargs):
         self.identifiant = self.etudiant.user.email + '~' + self.module.name
@@ -166,4 +170,25 @@ class Choix_Cours(models.Model):
 
     def save(self, *args, **kwargs):
         self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(5)])
+        super().save(*args, **kwargs)
+
+
+class Payer(models.Model):
+    identifiant = models.CharField(max_length=400, unique=True, blank=True)
+    modules = models.ForeignKey(module, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now=True)
+    montant = models.PositiveIntegerField()
+    session = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = "Paiement"
+        verbose_name_plural = "Paiements"
+        unique_together = ('modules', 'profile', 'session')
+
+    def __str__(self):
+        return f"{self.profile} + {self.modules}"
+
+    def save(self, *args, **kwargs):
+        self.identifiant = f"{self.profile} + {self.session} + {self.modules}"
         super().save(*args, **kwargs)

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block rep %}
+     <li><a class="dropdown-item" href="#">Saidou</a></li>
+    <li><a class="dropdown-item" href="#">Payer</a></li>
+{% endblock %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'cours/css/charge_financier.css' %}">
+{% endblock %}
+{% block content %}
+            <h3>Vue d'charger financer {{ hello }}</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+        {% for k, v in note.items %}
+            <p class="titre">{{ k }}</p>
+            {% for item in v %}
+                {% for ke, value in item.items %}
+
+                    <div class="d-flex">
+                        <p>{{ ke }}</p>
+                          <input type="text" value="{{ value }}" name="{{ ke }}#{{ k }}">
+                           <select name="{{ ke }}+{{ k }}">
+                                <option value="session été">été</option>
+                               <option value="session automne">Automne</option>
+                               <option value="session hiver">hiver</option>
+                               <option value="session printemps">Printemps</option>
+                           </select>
+                        {% for item_key, item_value in dict_error.items %}
+                        {% if k|add:ke == item_key %}
+                            <p>{{ item_value }}</p>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+        <input type="submit" value="soumettre">
+    </form>
+
+{% endblock %}

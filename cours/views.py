@@ -1,4 +1,4 @@
-import io
+from datetime import datetime, date, time, timedelta
 from pprint import pprint
 from PIL import Image, ImageEnhance
 from io import BytesIO
@@ -10,7 +10,7 @@ from django.core.mail import send_mail
 
 from user.models import MyUser, Profile
 
-from .models import Programme, Chapitre, module, Lesson, Choix_Cours, Note
+from .models import Programme, Chapitre, module, Lesson, Choix_Cours, Note, Payer
 from .fonction import file_verify
 
 
@@ -29,24 +29,24 @@ des principes de conception
 def programme_view(request):  # Pour afficher tout les modules
     all = Programme.objects.all()
 
-    return render(request, 'cours/programme.html', {'element': all})
+    return render(request, 'cours/cours_general/programme.html', {'element': all})
 
 
 def Module(request, ids):  # module contenu dans un programme
-    all_element = module.objects.filter(programme__identifiant__icontains=ids)
+    all_element = module.objects.filter(programme__identifiant=ids)
 
-    return render(request, 'cours/module.html', context={'element': all_element})
+    return render(request, 'cours/cours_general/module.html', context={'element': all_element})
 
 
 def chapitre_programme(request, ids):  # Pour afficher les chapitres contenu dans un programme
-    element = Chapitre.objects.filter(module__identifiant__icontains=ids)
-    return render(request, 'cours/chapitre.html', context={'element': element})
+    element = Chapitre.objects.filter(module__identifiant=ids)
+    return render(request, 'cours/cours_general/chapitre.html', context={'element': element})
 
 
 def lessons_chapitre(request, ids):  ##Pour afficher les lessons contenu dans un chapitre
     lesson = Lesson.objects.filter(chapitre__identifiant__icontains=ids)
 
-    return render(request, 'cours/lesson_chapitre.html', context={'lesson': lesson})
+    return render(request, 'cours/cours_general/lesson_chapitre.html', context={'lesson': lesson})
 
 
 
@@ -64,7 +64,7 @@ def all_chap_auteur(request, ids):  # Pour tout les chapitres crées par un aute
         else:
             liste_content.append(item.module.name)
 
-    return render(request, 'cours/all_chap_auteur.html', context={'auteur': auteur, 'first': liste_content[0]})
+    return render(request, 'cours/cours_general/all_chap_auteur.html', context={'auteur': auteur, 'first': liste_content[0]})
 
 
 ##NB il me reste ici à racommoder le chapitre au programme choisi
@@ -90,7 +90,7 @@ def create_chap(request):##Pour creer un chapitre par un professeur
                     print(element.identifiant)
                     return render(request, 'not_respect/chap_exist.html', context={"element": element})
             else:
-             return render(request, 'cours/create_chap.html', context={'module': mymodule, 'contraint': "Veuillez entrez le nom du chapitre"})
+             return render(request, 'cours/cours_general/create_chap.html', context={'module': mymodule, 'contraint': "Veuillez entrez le nom du chapitre"})
         else:
             return HttpResponse("<h2>Vous navez pas choisi votre module denseignement</h2>")
     return HttpResponse("<h3>veuillez vous connecter à votre compte pour avoir cette permission</h3>")
@@ -135,7 +135,7 @@ def create_lesson(request, ids):#Pour creer une lesson
 
             #print(len(context))
             if len(context) > 0:
-                return render(request, 'cours/create_lesson.html', context=context)
+                return render(request, 'cours/cours_general/create_lesson.html', context=context)
 
             else:
 
@@ -146,7 +146,7 @@ def create_lesson(request, ids):#Pour creer une lesson
             return redirect(request.path)
 
         else:
-            return render(request, 'cours/create_lesson.html')
+            return render(request, 'cours/cours_general/create_lesson.html')
 
     else:
         return HttpResponse(
@@ -169,20 +169,20 @@ def load_lesson(request, ids):
         if video != '/media/empty.mp4':
 
             print(element.video_lesson.url)
-            return render(request, 'cours/load_lesson_with_video.html', context={'title': element.name, 'description': element.description, 'video': video})
+            return render(request, 'cours/cours_general/load_lesson_with_video.html', context={'title': element.name, 'description': element.description, 'video': video})
         else:
-            return render(request, 'cours/load_lesson.html', context={'title': title, 'description': description})
+            return render(request, 'cours/cours_general/load_lesson.html', context={'title': title, 'description': description})
 
     except:
             print('La video de ce cours pas disponible')
-    return render(request, 'cours/load_lesson.html', context={'title': title, 'description': description})
+    return render(request, 'cours/cours_general/load_lesson.html', context={'title': title, 'description': description})
 #Remarque pour cette vue on il manque la redirection pour la lecture dela page html
 #when user click on the pdf icon
 
 
 def load_the_lesson_in_chapitre(request):
 
-    return render(request, 'cours/load_lesson_with_video.html')
+    return render(request, 'cours/cours_general/load_lesson_with_video.html')
 
 ##Vue pour l'espace de chaque membre
 
@@ -225,7 +225,7 @@ def vue_user(request, domaine):
             dico[item] = []
 
         for item in liste_set:
-            counter[item] = liste.count(item) #Pour compter le nombre d'etudiant d'une classe
+            counter[item] = liste.count(item)   #Pour compter le nombre d'etudiant d'une classe
 
         for item in all_note:
             if item.module.name in liste_recupere:
@@ -257,16 +257,103 @@ def vue_user(request, domaine):
         facultatifs = ["create an evaluation", "Create a group", "Create an evaluation/group work", "Put a deposit option"]
         #context_etudiant = {"obligatoires": obligation, "facultatif": facultatifs, "user": liste_user}
         context_etudiant = {"dico": dico, "dico1": dico1}
-        return render(request, 'cours/cours_vue_user.html', context=context_etudiant)
+        return render(request, 'cours/cours_general/cours_vue_user.html', context=context_etudiant)
 
     elif domaine == "charger_financier":
+        data, info_module = {}, {}
         obligation = ["Payé/Etudiant", "Non_payé/Etudiant", "Payé/Prof", "Not Paie/Prof"]
+        all_cours = module.objects.all()
+        cours_per_programme = {}
+        cours_per_programme1 = {}
+        number_student_per_module = {}
+        liste, liste1 = [], []  #cette liste sera pour recupéré tout les programmes de ma BD
+        all_paiement = Payer.objects.all()
+        dico_note = {}
+        for item in all_cours:
+            dico_note[item.name] = []
 
-        context_finance = {'obligation': obligation}
-        return render(request, 'cours/cours_vue_user.html', context=context_finance)
+        for item in all_cours:
+            info_module[item.name] = item.price.split('$')[0]
+        all_paiement = Payer.objects.all()
+
+        second, premier, note = '', '', ''
+
+        for item in all_paiement:
+            premier = item.identifiant.split('+')[0].strip()    #Pour eviter tout genre d'espacement
+            second = item.identifiant.split('+')[-1].strip()    #Pour eviter tout genre d'espacement
+            montant = item.montant
+            print(second)
+            if second in dico_note:
+                dico_note[second].append({premier: montant})
+
+        if request.method == "POST":
+            data = request.POST
+
+        dict_erreur = {}
+        dict_true_erreur = {}
+        dict_consigne = {}
+        dict_session = {}
+
+        for key, value in data.items():
+            if key != 'csrfmiddlewaretoken' and "+" not in key:
+                student_name = key.split('#')[0]   #Letudiant son donné dans la matiere
+                student_module = key.split('#')[-1]   #Letudiant sa matiere dans les donnés
+
+                for k in info_module:
+                    if student_module == k:
+                        try:
+                            if eval(info_module[student_module]) < eval(value):
+                                dict_erreur[student_module+student_name] = f"{value} est beaucoup grande le max est {info_module[student_module]}"
+
+                            else:
+                                dict_consigne[key] = eval(info_module[student_module]) - eval(value)
+                        except SyntaxError:
+                            return HttpResponse("Erreur de syntaxe")
+
+            elif "+" in key:
+                dict_session[key] = value
+            else:
+                pass
+        modules, etudiant = '', ''
+        #print(dict_session)
+
+        if len(dict_erreur) > 0:
+           dict_true_erreur['note'] = dico_note
+           dict_true_erreur['hello'] = 'hello mamadou'
+           dict_true_erreur['dict_error'] = dict_erreur
+           return render(request, 'cours/vue_etudiant/vu_charger_financier.html', context=dict_true_erreur)
+
+        elif len(dict_erreur) <= 0 < len(dict_consigne):
+            print(dict_consigne)
+
+            dict_consigne['note'] = dico_note
+            modules1, etudiant1, session_etudiant = '', '', ''
+            for item in dict_consigne:  #dict_consigne[item] correspond au reste de la valeur
+                for k in dict_session:
+                    modules = item.split("#")[-1]
+                    etudiant = item.split("#")[0]
+                    modules1 = k.split("+")[-1]
+                    etudiant1 = k.split("+")[0]
+                    if modules == modules1 and etudiant == etudiant1:
+                        prof = Profile.objects.get(user__email=etudiant)
+                        matiere = module.objects.get(name=modules)
+                        obj = Payer.objects.filter(profile=prof, modules=matiere, session=dict_session[k])
+                        if obj.exists():
+                            obj.montant = dict_consigne[item]
+                            obj.save()
+                        else:
+                            Payer.objects.create(profile=prof, modules=matiere, session=dict_session[k], montant=dict_consigne[item])
+                        print("#"*40)
+
+            return render(request, 'cours/vue_etudiant/vu_charger_financier.html', context=dict_consigne)
+
+
+        context_finance = {'obligation': obligation, 'note': dico_note}
+        return render(request, 'cours/vue_etudiant/vu_charger_financier.html', context=context_finance)
 
     elif domaine == "etudiant":
         context = {}
+        necessaire = ["scolarité", "note", "bilan"]
         module_image = []   #Les matières qui ont une photo d'image
         module_not_image = []   #Les matières qui n'ont pas de photo
         email_etudiant = request.user.email     #Je recupère le mail de mes users
@@ -284,32 +371,15 @@ def vue_user(request, domaine):
             print(price.price)
 
         for item in liste_module:
+            print(item.identifiant)
             if item.image_module:
-                """
-                with open(item.image_module.path, 'rb') as f:
-                    image = Image.open(f)   #Ouverture du fichier
-
-                    image = ImageEnhance.Brightness(image)
-                    image = image.enhance(2.0)
-                    image = ImageEnhance.Sharpness(image)
-                    image = image.enhance(1.6)
-
-                    #crée le binaire de limage modifiée
-                    buffer = BytesIO()
-
-                    image.save(buffer, format='jpeg')
-                    image.show()
-                    image_data = buffer.getvalue()
-
-                    item.image_module.save(item.name, BytesIO(image_data), save=True)
-                    """
                 module_image.append(item)
 
                 #print(image.show())
             else:
                 module_not_image.append(item)
                 print(f"{item.name} n'a pas dimage!")
-        context = {'image': module_image, 'not_image': module_not_image}
+        context = {'image': module_image, 'not_image': module_not_image, 'necessaire': necessaire}
         return render(request, "cours/vue_etudiant/first_vue.html", context=context)
     return render(request, 'cours/cours_vue_user.html', context={'element': domaine})
 #Pause de développement pour finir d'abord avec le choix de cours pour les étudiants.
@@ -334,17 +404,17 @@ def choix_cours(request):
         val1 = ''
         context_modules = {}
         domaine = request.user.profile.domaine_programme.title()
-        module_choices_name = module.objects.filter(programme__name=domaine)#il va me retourner le nom des modules en formats chaine de caractère dans un type django.models.query.set
-        module_choices_name = [item.name for item in module_choices_name]#j'ai converti le type de sorti en class list
-        email = request.user.email #Recuperer le mail de l'utilisateur pour mieux chercher son profil
-        all_element = Choix_Cours.objects.filter(user__user__email=email)#Pour retrouver tout les choix de mon  utilisateur dans ma BD
+        module_choices_name = module.objects.filter(programme__name=domaine)    #il va me retourner le nom des modules en formats chaine de caractère dans un type django.models.query.set
+        module_choices_name = [item.name for item in module_choices_name]   #j'ai converti le type de sorti en class list
+        email = request.user.email      #Recuperer le mail de l'utilisateur pour mieux chercher son profil
+        all_element = Choix_Cours.objects.filter(user__user__email=email)   #Pour retrouver tout les choix de mon  utilisateur dans ma BD
 
-        for item in all_element: #le all_element est une liste qui contient que des strings
-            item.cours = eval(item.cours) #j'evalue les items de cet all_element pour les convertir facilement en liste
-            all_choices.extend(item.cours)#à chaque item retrouvé  je letend dans ma dictionnaire que javais déclaré
+        for item in all_element:    #le all_element est une liste qui contient que des strings
+            item.cours = eval(item.cours)   #j'evalue les items de cet all_element pour les convertir facilement en liste
+            all_choices.extend(item.cours)  #à chaque item retrouvé  je letend dans ma dictionnaire que javais déclaré
 
-        all_choices = list(set(all_choices)) #Pour chaque element  de ma liste je le set pour eviter la repetition, qui va retourner un set puis le list pour renvoyer une liste
-        user = Profile.objects.get(user__email=email)#il retourne l'utilisateur qui à le même profile
+        all_choices = list(set(all_choices))    #Pour chaque element  de ma liste je le set pour eviter la repetition, qui va retourner un set puis le list pour renvoyer une liste
+        user = Profile.objects.get(user__email=email)   #il retourne l'utilisateur qui à le même profile
 
         for item in module_choices_name:
             if item in all_choices:
@@ -354,6 +424,8 @@ def choix_cours(request):
 
         if request.method == "POST":
             val1 = request.POST.getlist('option')
+            etudiant_principal = Profile.objects.get(user__email=email)
+            print(etudiant_principal)
             pprint(val1)
             if len(val1) == 0:
                 context_modules['module_choices_name'] = liste1_not
@@ -362,10 +434,24 @@ def choix_cours(request):
                 return render(request, 'cours/choix_cours.html', context=context_modules)
 
             else:
+                dict_union = {}
+                matiere, montant_prix = '', ''
+                #etudiant_principal = Profile.objects.get(user__user__email=email)
+                for item in val1:
+                    matiere = module.objects.get(name=item)
+                    montant_prix = matiere.price.split("$")[0]
+                    print(user)
+                    print(matiere)
+                    print(montant_prix)
+
+                    Payer.objects.create(modules=matiere, profile=user, montant=montant_prix, session="automne")
+
                 Choix_Cours.objects.create(user=user, cours=val1, groupe=1)
+
+                #je dois crée sa facture de paiement ici aussi
                 return redirect(request.path)
 
             return redirect(request.path)
-        return render(request, 'cours/choix_cours.html', context={'module_choices_name': liste1_not, 'not_choice': liste1_contient})
+        return render(request, 'cours/cours_general/choix_cours.html', context={'module_choices_name': liste1_not, 'not_choice': liste1_contient})
 
     return HttpResponse("<h1>Vous ne pouvez pas faire de choix de cours car vous n'êtes pas etudiant</h1>")

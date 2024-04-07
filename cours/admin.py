@@ -50,3 +50,12 @@ class ChoixCours(admin.ModelAdmin):
         'user',
         'date'
     )
+
+@admin.register(Payer)
+class Payer(admin.ModelAdmin):
+    list_display = (
+        'identifiant',
+        'profile',
+        'modules',
+        'montant'
+    )
