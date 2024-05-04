@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block rep %}
+    {% for item in necessaire %}
+        <li><a class="dropdown-item" href="#">{{ item }}</a></li>
+    {% endfor %}
+{% endblock %}
+
+{% block css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'cours/css/first_style.css' %}">
+{% endblock %}
+
+<!-- Ce block va me permettre de resoudre les problèmes de mon affichage pour les
+types de possibilités de letudiant -->
+{% block continu %}
+
+{% endblock %}
+
+{% block suite %}
+    <li>
+        <a href="{% url 'cours:detail_paiement' etud=etudiant %}" class="nav-link">Paiement</a>
+    </li>
+    <li>
+        <a href="#" class="nav-link">Note</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+      <h3>Hello Mamadou Saidou Diallo</h3>
+
+        <h2>Vue d'Charger financier</h2>
+
+        {% for key, valeur in chapitre.items %}
+            <button value="{{ key }}" class="titres">{{ key }}</button>
+            <div id="{{ key }}">
+                {% for element in valeur %}
+                    <p>{{ element.name }}</p>
+                {% endfor %}
+                <hr>
+            </div>
+        {% endfor %}
+{% endblock %}
+
+<!--
+{% block js %}
+<script src="{% static 'cours/jss/first_vue.js' %}">
+
+</script>
+{% endblock %}
+-->

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+        <link rel="stylesheet" href="{% static 'cours/css/style_prof/planif_and_note.css' %}">
+{% endblock %}
+
+{% block content %}
+        <h2>Hello la planification mon bon prof!</h2>
+        <p>Donnez la repartition de vos note</p>
+        <div>
+                <div id="first-message">
+                        <input type="text" class="message"></input>
+                        <label></label><input type="number" min="1" placeholder="ponderation" class="pond">
+                        <button id="supprimer1" onclick="supprimerMessage(this)">supprime moi</button>
+                </div>
+
+                <form method="POST">
+                        {% csrf_token %}
+                      <div class="output">
+
+                        </div>
+                       <button class="btn soummission btn-warning">soumettre</button>
+                </form>
+
+        </div>
+
+        <input type="text" placeholder="Ajouter un chapitre" id="chapitre">
+        <button class="btn btn-info" id="ajouter">Ajouter</button>
+        <button class="btn btn-primary">Repartir</button>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="{% static 'cours/jss/prof/planifie_note2.js' %}">
+
+</script>
+
+{% endblock %}

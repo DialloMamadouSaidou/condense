@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>Chapitre</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    <link rel="stylesheet" href="{% static 'cours/first_style.css' %}">
+</head>
+<body>
+    <h3>Mes Chapitres</h3>
+    <button class="btn btn-primary">Crée un Chapitre</button>
+    <div class="entete d-flex justify-content-around">
+            <a href="#">Modifier</a>
+            <a href="#">Supprimer</a>
+    </div>
+    <div id="chapitre">
+        {% for item in element %}
+            <p><a href="{% url 'cours:lesson' ids=item.identifiant %}">{{ item.name }}</a></p>
+        {% endfor %}
+    </div>
+</body>
+</html>
