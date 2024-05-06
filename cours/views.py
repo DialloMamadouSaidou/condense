@@ -12,7 +12,7 @@ from django.core.mail import send_mail
 from user.models import MyUser, Profile
 
 from .models import *
-from .fonction import file_verify
+from .fonction import *
 
 #Je me suis limité au niveau du vue de la note.
 # Create your views here.
@@ -214,40 +214,96 @@ def affiche_etudiant(request, matiere):
 
 
 def planifie_notation(request, crs):
+    professeur = Profile.objects.get(user__email=request.user.email)
+    mon_crs = module.objects.get(name=crs)
+    element = Planification.objects.filter(professeur=professeur, matiere=mon_crs)
+    if element.exists():
+        return HttpResponse("Ce cours est déjà pondéré")
 
-    liste,  liste_erreur = [], []
-    quota = {}
-    somme = 0
-    if request.method == 'POST':
-        data = request.POST
+    if mon_crs.charge_crs.user.email == request.user.email:
+        liste, liste_erreur = [], []
+        quota = {}
+        somme = 0
+        if request.method == 'POST':
+            data = request.POST
 
-        for key, value in data.items():
-            if key != 'csrfmiddlewaretoken' and key.startswith('ponde'):
-                if value == '':
-                    liste_erreur.append(key)
-                else:
-                    u = key[-1]
-                    somme += int(value)
-                    quota[u] = {f'exam{u}': value}
-                    pass
+            for key, value in data.items():
+                if key != 'csrfmiddlewaretoken' and key.startswith('ponde'):
+                    if value == '':
+                        liste_erreur.append(key)
+                    else:
+                        u = key[-1]
+                        somme += int(value)
+                        quota[u] = {f'exam{u}': value}
+                        pass
 
-        if len(liste_erreur) > 0:
-            return HttpResponse("<h2>Toutes vos note doivent avoir une ponderation</h2>")
+            if len(liste_erreur) > 0:
+                return HttpResponse("<h2>Toutes vos note doivent avoir une ponderation</h2>")
 
-        if somme == 100:
-            professeur = Profile.objects.get(user__email=request.user.email)
-            mon_crs = module.objects.get(name=crs)
-            Planification.objects.create(professeur=professeur, matiere=mon_crs, ponderation=quota)
-            return HttpResponse("Ponderation bien reçu!")
-        else:
-            return HttpResponse("La somme de vos pondération doivent être de 100%")
+            if somme == 100:
+
+                Planification.objects.create(professeur=professeur, matiere=mon_crs, ponderation=quota)
+                return HttpResponse("Ponderation bien reçu!")
+            else:
+                return HttpResponse("La somme de vos pondération doivent être de 100%")
+
+        return render(request, 'cours/prof/planifie_note.html')
+
+    else:
+        return HttpResponse("<h2>Vous n'êtes pas le charger de ce cours !<h2>")
 
     return render(request, 'cours/prof/planifie_note.html')
 
 
-def noter_etudiant(request):
+def noter_etudiant(request, mat):
+    professeur = Profile.objects.get(user__email=request.user.email)
+    mon_crs = module.objects.get(name=mat)
+    element = Planification.objects.filter(professeur=professeur, matiere=mon_crs).first()
 
-    return render(request, 'cours/prof/noter_etudiant.html')
+    majoration = Planification.objects.filter(professeur=professeur, matiere=mon_crs).values_list('majoration')
+
+    print(majoration)
+
+    if element:
+        liste_ponderation, liste_ponderation2 = [], []
+
+        element.ponderation = eval(element.ponderation)
+        for ponderation in element.ponderation.values():
+            for k, v in ponderation.items():
+                liste_ponderation.append(f"{k}~{v}%")
+                liste_ponderation2.append(v)
+
+        all_cours = Choix_Cours.objects.all()
+        liste_etudiant = Choix_Cours.objects.filter(cours__contains=mat).values_list('user__user__email', flat=True)
+
+    else:
+        return HttpResponse("Votre matiere nest pas pondéré pour être noté pour le moment!")
+
+    if request.method == 'POST':
+        liste_result = []
+        data_majoration = {}
+        data2 = defaultdict(list)
+        data = request.POST
+        data = dict(data)
+
+        for key, valeur in data.items():
+            if key != 'csrfmiddlewaretoken' and '@' in key:
+                print(key)
+                for item in valeur:
+                    print(item)
+                    data2[key].append(f"{key}~{item}")  #Cette ligne me permet de recuperer dans mon dictionnaire letudiant et ses notes.
+
+            elif '@' not in key and key != 'csrfmiddlewaretoken':
+                data_majoration[key] = valeur
+
+        for item in data2.values():
+            liste_result.append(list(zip(item, liste_ponderation2))) #liste_result me donnera juste letudiant sa note et le pourcentage de son examen
+
+        print(liste_result)
+    return render(request, 'cours/prof/noter_etudiant.html', context={'etudiant': liste_etudiant, 'ponde': liste_ponderation})
+
+
+
 @login_required
 def vue_user(request, domaine):
     #pour le charge de cours à revoir poour optimiser le code

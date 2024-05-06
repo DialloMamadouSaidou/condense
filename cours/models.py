@@ -147,8 +147,7 @@ class Note(models.Model):   #Note par matiere
     etudiant = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name='Etudiant')
     module = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
     note = models.CharField(max_length=55)
-    commentaire = models.CharField(max_length=500, default='')
-
+    commentaire = models.CharField(max_length=500, default='Ceci est un commentaire')
 
     def save(self, *args, **kwargs):
         self.identifiant = self.etudiant.user.email + '~' + self.module.name
@@ -167,16 +166,20 @@ class Note(models.Model):   #Note par matiere
 
 
 class Planification(models.Model):  #Ce modèle consiste juste à planifier les notations
-    identifiant = models.CharField(max_length=10, blank=True)
+    identifiant = models.CharField(max_length=150, blank=True)
     professeur = models.ForeignKey(Profile,  on_delete=models.SET_NULL, null=True)
     matiere = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
     session = models.CharField(max_length=30, default='Session Hiver')
     ponderation = models.CharField(max_length=255, verbose_name='ponderation')
+    majoration = models.CharField(max_length=255, verbose_name='majoration')
 
     class Meta:
         unique_together = ('professeur', 'matiere')
         verbose_name = 'Ponderation'
         verbose_name_plural = 'Ponderations'
+
+    def clean(self):
+        pass
 
     def save(self, *args, **kwargs):
         self.identifiant = f'{self.professeur} ~ {self.matiere}'

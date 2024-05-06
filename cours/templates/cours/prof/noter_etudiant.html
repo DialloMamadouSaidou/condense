@@ -5,4 +5,42 @@
 {% block content %}
     <h3>Noté vos etudiant</h3>
 
+    <p>La notation sera comme suit: </p>
+    <p>Donnez la note majorante de chaque exam </p>
+    <p>Le système se chargera de calculer la moyenne en tenant compte des ponderations</p>
+<form method="POST">
+    {% csrf_token %}
+    {% for item in ponde %}
+            <div>
+                <label>{{ item }}</label>
+                <input type="number" placeholder="Donnez la note majorante" name="{{ item }}">
+            </div>
+    {% endfor %}
+    <table class="table">
+        <thead>
+                <tr>
+                    <th scope="col">Etudiant</th>
+                    {%  for index in ponde %}
+                    <th scope="col">{{ index }}</th>
+                    {% endfor %}
+
+                </tr>
+        </thead>
+        <tbody>
+        {% for item in etudiant %}
+            <tr>
+                <td scope="row">
+                    {{ item }}
+                </td>
+                {% for items in ponde %}
+                    <td>
+                        <input type="number" min="1" max="100" placeholder="Entrez la note" name="{{ item }}">
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" class="btn btn-info" value="enregistrer">
+</form>
 {% endblock %}
