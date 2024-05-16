@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, date, time, timedelta
 from pprint import pprint
 from collections import defaultdict, deque
@@ -6,10 +7,10 @@ from io import BytesIO
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail
 
-from user.models import MyUser, Profile
+from user.models import *
 
 from .models import *
 from .fonction import *
@@ -24,7 +25,9 @@ se trouve dans le dossier cours
 le dossier empty_cours contiendra les vues en cas d'echec de telechargement ou de non respect
 des principes de conception
 ##################################################################################
-
+le fichier fonction.py contient des fonctions supplémentaire utilisés dans mes vues.
+##################################################################################
+Le système de notation sera toujours à bien revoir.
 """
 
 
@@ -217,7 +220,7 @@ def planifie_notation(request, crs):
     professeur = Profile.objects.get(user__email=request.user.email)
     mon_crs = module.objects.get(name=crs)
     element = Planification.objects.filter(professeur=professeur, matiere=mon_crs)
-    if element.exists():
+    if element:
         return HttpResponse("Ce cours est déjà pondéré")
 
     if mon_crs.charge_crs.user.email == request.user.email:
@@ -226,7 +229,6 @@ def planifie_notation(request, crs):
         somme = 0
         if request.method == 'POST':
             data = request.POST
-
             for key, value in data.items():
                 if key != 'csrfmiddlewaretoken' and key.startswith('ponde'):
                     if value == '':
@@ -241,9 +243,27 @@ def planifie_notation(request, crs):
                 return HttpResponse("<h2>Toutes vos note doivent avoir une ponderation</h2>")
 
             if somme == 100:
+                #print(quota)
+                saidou_note = []
+                mes_user = list(Choix_Cours.objects.filter(cours__contains=crs).values_list('user__user__email'))
+
+                mes_user = [list(item)[0] for item in mes_user]
+
+                for item in quota.values():
+                    for key, value in item.items():
+                        saidou_note.append({f'{key}~{value}': ''})
+
+                for item in mes_user:
+                    mon_user = Profile.objects.get(user__email=item)
+                    element = Note.objects.get(module=mon_crs, etudiant=mon_user, professeur=professeur)
+                    element.note = saidou_note
+                    element.save()
+                print(saidou_note)
+
+                concerne = Note.objects.get(professeur=professeur, etudiant=mon_user, module=mon_crs)
 
                 Planification.objects.create(professeur=professeur, matiere=mon_crs, ponderation=quota)
-                return HttpResponse("Ponderation bien reçu!")
+                return redirect(request.path)
             else:
                 return HttpResponse("La somme de vos pondération doivent être de 100%")
 
@@ -255,53 +275,120 @@ def planifie_notation(request, crs):
     return render(request, 'cours/prof/planifie_note.html')
 
 
-def noter_etudiant(request, mat):
-    professeur = Profile.objects.get(user__email=request.user.email)
-    mon_crs = module.objects.get(name=mat)
-    element = Planification.objects.filter(professeur=professeur, matiere=mon_crs).first()
+def give_note_max(request, mod):
+    verifie = Planification.objects.filter(matiere__name__contains=mod)
 
-    majoration = Planification.objects.filter(professeur=professeur, matiere=mon_crs).values_list('majoration')
+    if verifie:
+        liste, dico = [], {}
+        professeur = get_object_or_404(Profile, user__email=request.user.email)
+        mon_crs = get_object_or_404(module, name=mod)
+        print(professeur)
+        majoration = Planification.objects.filter(professeur=professeur, matiere=mon_crs).first()
+        mon_dico = eval(majoration.ponderation)
+        mon_dico = decortique(mon_dico)  # =>justificatif donné dans le fichier fonction.py
 
-    print(majoration)
+        if request.method == 'POST':
+            data = request.POST
 
-    if element:
-        liste_ponderation, liste_ponderation2 = [], []
+            for key, value in data.items():
+                if key != 'csrfmiddlewaretoken':
+                    # print(key, value)
+                    if value == '':
+                        dico[key] = f"{key.upper()} dois avoir une note maximale svp"
+                    else:
+                        liste.append(value)
 
-        element.ponderation = eval(element.ponderation)
-        for ponderation in element.ponderation.values():
-            for k, v in ponderation.items():
-                liste_ponderation.append(f"{k}~{v}%")
-                liste_ponderation2.append(v)
+            if len(dico) > 0:
+                for k, v in dico.items():
+                    print(k, v)
+                return render(request, 'cours/prof/majoration.html', context={'mes_exam': mon_dico, 'dico': dico})
+            else:
 
-        all_cours = Choix_Cours.objects.all()
-        liste_etudiant = Choix_Cours.objects.filter(cours__contains=mat).values_list('user__user__email', flat=True)
+                majoration.majoration = liste
+                majoration.save()
+
+                return redirect('cours:note_etudiant', mat=mod)
+        return render(request, 'cours/prof/majoration.html', context={'mes_exam': mon_dico})
 
     else:
-        return HttpResponse("Votre matiere nest pas pondéré pour être noté pour le moment!")
+        return HttpResponse("<h2>Votre matière nest pas planifié dabord pour donnez des notes! </h2>")
 
-    if request.method == 'POST':
-        liste_result = []
-        data_majoration = {}
-        data2 = defaultdict(list)
-        data = request.POST
-        data = dict(data)
 
-        for key, valeur in data.items():
-            if key != 'csrfmiddlewaretoken' and '@' in key:
-                print(key)
-                for item in valeur:
-                    print(item)
-                    data2[key].append(f"{key}~{item}")  #Cette ligne me permet de recuperer dans mon dictionnaire letudiant et ses notes.
+def noter_etudiant(request, mat):
+    verifie = Planification.objects.filter(matiere__name__contains=mat)
+    if verifie:
+        dico_note, liste_etudiant, ponderation_finale, liste_ponderation2 = {}, [], {}, []
+        professeur = Profile.objects.get(user__email=request.user.email)
+        mon_crs = module.objects.get(name=mat)
+        element = Planification.objects.filter(professeur=professeur, matiere=mon_crs).first()
 
-            elif '@' not in key and key != 'csrfmiddlewaretoken':
-                data_majoration[key] = valeur
+        majoration = Planification.objects.filter(professeur=professeur, matiere=mon_crs).values_list(
+            'majoration').first()
+        majoration = list(majoration)
 
-        for item in data2.values():
-            liste_result.append(list(zip(item, liste_ponderation2))) #liste_result me donnera juste letudiant sa note et le pourcentage de son examen
+        if majoration[0] is None:  # Cette condition permet de donner une note maximale dans les examesn
+            print(element.ponderation)
+            print("Pas de majoration pour le moment")
+            return redirect('cours:ponde', mod=mat)
 
-        print(liste_result)
-    return render(request, 'cours/prof/noter_etudiant.html', context={'etudiant': liste_etudiant, 'ponde': liste_ponderation})
+        if element:
+            liste_ponderation, liste_ponderation2 = [], []
 
+            element.ponderation = eval(element.ponderation)
+            for ponderation in element.ponderation.values():
+                for k, v in ponderation.items():
+                    liste_ponderation.append(
+                        f"{k}~{v}%")  # Liste ponderation renvoie juste la ponderation avec son repartition
+                    liste_ponderation2.append(v)  # Celle ci renvoie juste le pourcentage de chaque examen
+
+            ponderation_finale = {key: value for key, value in
+                                  zip(liste_ponderation, eval(majoration[0]))}  # Celle ci renvoie juste chaque examen
+            # son pourcentage et sa note maximale
+
+            all_cours = Choix_Cours.objects.all()
+            liste_etudiant = Choix_Cours.objects.filter(cours__contains=mat).values_list('user__user__email', flat=True)
+            liste_etudiant_note = Note.objects.filter(module__name__contains=mat).values_list('etudiant__user__email',
+                                                                                              'note')
+
+            # dico_note = {k: v for k, v in liste_etudiant_note}
+            for k, v in liste_etudiant_note:
+                dico_note[k] = eval(v)
+
+        if request.method == 'POST':
+            dict_bd = defaultdict(list)
+            liste_result = []
+            data_majoration = {}
+            data2 = defaultdict(list)
+            data = request.POST
+            data = dict(data)
+
+            for key, valeur in data.items():
+                if key != 'csrfmiddlewaretoken':
+                    print(key, valeur)
+                    email_etudiant, exam = key.split()
+
+                    if valeur[0]:
+                        valeur = str(valeur)
+                        valeur = re.sub(r"[\['\]""]", '', valeur)
+
+                        valeur = eval(valeur)
+                    else:
+                        valeur = str(valeur)
+                        valeur = re.sub(r"[\['\]""]", '', valeur)
+
+                    dict_bd[email_etudiant].append({exam: str(valeur)})
+
+            #Il me faut une fonction qui va me servir à ajouter des éléments à cette liste de note pour la synchroniser chaque fois
+            for k, v in dict_bd.items():
+                etudiant = Profile.objects.get(user__email=k)
+                note_etudiant = Note.objects.get(module=mon_crs, etudiant=etudiant, professeur=professeur)
+                print(v)
+
+        return render(request, 'cours/prof/noter_etudiant.html',
+                      context={'etudiant': liste_etudiant, 'ponde': ponderation_finale, 'note': dico_note})
+
+    else:
+        return HttpResponse("<h2>Cette matière n'a pas été pondéré dabord pour donner une note </h2>")
 
 
 @login_required
@@ -445,7 +532,6 @@ def choix_cours(request):
 
         all_choices = list(
             set(all_choices))  #Pour chaque element  de ma liste je le set pour eviter la repetition, qui va retourner un set puis le list pour renvoyer une liste
-        user = Profile.objects.get(user__email=email)  #il retourne l'utilisateur qui à le même profile
 
         for item in module_choices_name:
             if item in all_choices:
@@ -456,8 +542,7 @@ def choix_cours(request):
         if request.method == "POST":
             val1 = request.POST.getlist('option')
             etudiant_principal = Profile.objects.get(user__email=email)
-            print(etudiant_principal)
-            pprint(val1)
+            print(etudiant_principal.choices)
             if len(val1) == 0:
                 context_modules['module_choices_name'] = liste1_not
                 context_modules['not_choice'] = liste1_contient
@@ -471,14 +556,15 @@ def choix_cours(request):
                 for item in val1:
                     matiere = module.objects.get(name=item)
                     montant_prix = matiere.price.split("$")[0]
-                    print(user)
-                    print(matiere)
-                    print(montant_prix)
+
                     current_month = datetime.now()
                     current_month = current_month.month
-                    Payer.objects.create(modules=matiere, profile=user, montant=montant_prix, session="session automne")
+                    professeur = matiere.charge_crs.user.email
+                    professeur = Profile.objects.get(user__email=professeur)
+                    Note.objects.create(professeur=professeur, etudiant=etudiant_principal, module=matiere)     #Cette ligne permet de créer une note automatique pour letudiant
+                    Payer.objects.create(modules=matiere, profile=etudiant_principal, montant=montant_prix, session="session automne")
 
-                Choix_Cours.objects.create(user=user, cours=val1, groupe=1)
+                Choix_Cours.objects.create(user=etudiant_principal, cours=val1, groupe=1)
 
                 #je dois crée sa facture de paiement ici aussi
                 return redirect(request.path)

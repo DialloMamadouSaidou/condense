@@ -1,0 +1,33 @@
+{% extends 'base_user.html' %}
+{% load static %}
+
+{% block css %}
+        <link rel="stylesheet" href="{% static 'cours/css/style_prof/charge_financier.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <h2>Hello Mamadou Saidou</h2>
+    <h3>Vous devez donné les notes majorantes de vos examen</h3>
+
+    <form method="POST">
+
+        {% for key, value in mes_exam.items %}
+            {% csrf_token %}
+
+            <div>
+                <input type="number" placeholder="Donnez la note majorante de lexamen" name="{{ key }}">
+                <label>{{ key }}</label>
+                    {% for k, v in dico.items %}
+                    {% if k == key %}
+                        <p>{{ v }}</p>
+                    {% endif %}
+                    {% endfor %}
+            </div>
+
+        {% endfor %}
+
+        <input type="submit" value="soumettre" class="btn btn-info">
+    </form>
+
+{% endblock %}

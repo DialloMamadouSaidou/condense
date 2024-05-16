@@ -10,10 +10,10 @@
     <p>Le système se chargera de calculer la moyenne en tenant compte des ponderations</p>
 <form method="POST">
     {% csrf_token %}
-    {% for item in ponde %}
+    {% for item, valeur in ponde.items %}
             <div>
                 <label>{{ item }}</label>
-                <input type="number" placeholder="Donnez la note majorante" name="{{ item }}">
+                <input type="number" placeholder="Donnez la note majorante" value="{{ valeur }}">
             </div>
     {% endfor %}
     <table class="table">
@@ -27,15 +27,23 @@
                 </tr>
         </thead>
         <tbody>
-        {% for item in etudiant %}
+
+        {% for key, value in note.items %}
             <tr>
-                <td scope="row">
-                    {{ item }}
-                </td>
-                {% for items in ponde %}
-                    <td>
-                        <input type="number" min="1" max="100" placeholder="Entrez la note" name="{{ item }}">
-                    </td>
+                <td scope="row">{{ key }}</td>
+
+                {% for item in value %}
+                    {% for k, v in item.items %}
+                        {% if v == '' %}
+                            <td>
+                                <input type="number" name="{{ key }} {{ k }}" placeholder="donnez votre note">
+                            </td>
+                        {% else %}
+                        <td>
+                            <input type="text" value="{{ v }}">
+                        </td>
+                        {% endif %}
+                    {% endfor %}
                 {% endfor %}
             </tr>
         {% endfor %}
@@ -43,4 +51,7 @@
     </table>
     <input type="submit" class="btn btn-info" value="enregistrer">
 </form>
+
+
 {% endblock %}
+

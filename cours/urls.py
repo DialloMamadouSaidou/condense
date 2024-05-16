@@ -21,5 +21,6 @@ urlpatterns = [
     path('affiche/<str:matiere>', affiche_etudiant, name='affiche'), #Cette vue permet dafficher les eetudiant d'un prof par matiere et les notés
     path('planifie/<str:crs>', planifie_notation, name='planifie'),    #Cette vu permet à un professeur de planifier sa notation en fonction des pourcentages quil donne
 
-    path('note/<str:mat>', noter_etudiant, name='note_etudiant') #Cette vue consiste à noté mes etudiants
+    path('note/<str:mat>', noter_etudiant, name='note_etudiant'),    #Cette vue consiste à noté mes etudiants
+    path('ponde/<str:mod>', give_note_max, name='ponde')
 ]

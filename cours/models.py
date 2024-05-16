@@ -146,18 +146,18 @@ class Note(models.Model):   #Note par matiere
     professeur = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name='professeur')
     etudiant = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name='Etudiant')
     module = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
-    note = models.CharField(max_length=55)
+    note = models.CharField(max_length=100, blank=True, null=True)
     commentaire = models.CharField(max_length=500, default='Ceci est un commentaire')
 
     def save(self, *args, **kwargs):
-        self.identifiant = self.etudiant.user.email + '~' + self.module.name
+        self.identifiant = f"{self.etudiant} {self.module.name}"
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'note'
         verbose_name_plural = "Note Etudiant"
         ordering = ['note']
-        unique_together = ('module', 'etudiant')
+        unique_together = ('module', 'etudiant', 'professeur')
 
     def __str__(self):
         return f"{self.etudiant} {self.module}"
@@ -171,12 +171,13 @@ class Planification(models.Model):  #Ce modèle consiste juste à planifier les 
     matiere = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
     session = models.CharField(max_length=30, default='Session Hiver')
     ponderation = models.CharField(max_length=255, verbose_name='ponderation')
-    majoration = models.CharField(max_length=255, verbose_name='majoration')
+    majoration = models.CharField(max_length=255, verbose_name='majoration', null=True, blank=True
+                                  )
 
     class Meta:
         unique_together = ('professeur', 'matiere')
-        verbose_name = 'Ponderation'
-        verbose_name_plural = 'Ponderations'
+        verbose_name = 'Plannification'
+        verbose_name_plural = 'Plannifications'
 
     def clean(self):
         pass
@@ -185,6 +186,9 @@ class Planification(models.Model):  #Ce modèle consiste juste à planifier les 
         self.identifiant = f'{self.professeur} ~ {self.matiere}'
 
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Plannification: {self.professeur} {self.matiere}"
 
 class Commentaire(models.Model):
     identifiant = models.CharField(max_length=20, blank=True)
@@ -206,7 +210,6 @@ class Choix_Cours(models.Model):
     groupe = models.PositiveIntegerField(default=1)
     session = models.CharField(max_length=200, default='Session Hiver', blank=True)
     date = models.DateTimeField(auto_now=True)
-
 
     def __str__(self):
         return self.identifiant
