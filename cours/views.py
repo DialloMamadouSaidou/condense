@@ -45,7 +45,15 @@ def Module(request, ids):  # module contenu dans un programme
 
 def chapitre_programme(request, ids):  # Pour afficher les chapitres contenu dans un programme
     element = Chapitre.objects.filter(module__identifiant=ids)
-    return render(request, 'cours/cours_general/chapitre.html', context={'element': element})
+    dico_lesson = {}
+    for item in element:
+        dico_lesson[item] = Lesson.objects.filter(chapitre__name=item)
+
+    for key, value in dico_lesson.items():
+        print(key)
+        for item in value:
+            print(item)
+    return render(request, 'cours/cours_general/chapitre.html', context={'element': element, 'lesson': dico_lesson})
 
 
 def lessons_chapitre(request, ids):  ##Pour afficher les lessons contenu dans un chapitre
@@ -335,6 +343,7 @@ def noter_etudiant(request, mat):
             liste_ponderation, liste_ponderation2 = [], []
 
             element.ponderation = eval(element.ponderation)
+
             for ponderation in element.ponderation.values():
                 for k, v in ponderation.items():
                     liste_ponderation.append(
@@ -378,11 +387,25 @@ def noter_etudiant(request, mat):
 
                     dict_bd[email_etudiant].append({exam: str(valeur)})
 
+            liste_note = [eval(item) for item in eval(element.majoration)]
+
+
             #Il me faut une fonction qui va me servir à ajouter des éléments à cette liste de note pour la synchroniser chaque fois
             for k, v in dict_bd.items():
                 etudiant = Profile.objects.get(user__email=k)
                 note_etudiant = Note.objects.get(module=mon_crs, etudiant=etudiant, professeur=professeur)
-                print(v)
+                liste1 = eval(note_etudiant.note)
+                liste2 = v
+                #print(liste2)
+
+                liste_general = regroupe_synchronise(liste1, liste2)
+                note_etudiant.note = liste_general
+                note_etudiant.moyenne = calcul_moyenne(note_etudiant.note, liste_note)
+                print(note_etudiant.note)
+                note_etudiant.save()
+
+            return redirect(request.path)
+
 
         return render(request, 'cours/prof/noter_etudiant.html',
                       context={'etudiant': liste_etudiant, 'ponde': ponderation_finale, 'note': dico_note})
@@ -448,9 +471,6 @@ def vue_user(request, domaine):
                 context_cours[matiere] = Chapitre.objects.filter(module__name=index)
                 liste.append(matiere)
 
-        for key, value in context_cours.items():
-            print(key, value)
-            print("**" * 30)
         print(liste)
 
         return render(request, 'cours/vue_etudiant/first_vue.html',

@@ -10,19 +10,72 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
 
-    <link rel="stylesheet" href="{% static 'cours/first_style.css' %}">
+    <link rel="stylesheet" href="{% static 'cours/css/first_style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 </head>
 <body>
     <h3>Mes Chapitres</h3>
-    <button class="btn btn-primary">Crée un Chapitre</button>
-    <div class="entete d-flex justify-content-around">
-            <a href="#">Modifier</a>
-            <a href="#">Supprimer</a>
-    </div>
+    <!--<button class="btn btn-primary">Crée un Chapitre</button>-->
+
     <div id="chapitre">
-        {% for item in element %}
-            <p><a href="{% url 'cours:lesson' ids=item.identifiant %}">{{ item.name }}</a></p>
+
+
+        {% for k, v in lesson.items %}
+
+        <div class="d-flex justify-content-between">
+            <p class="titre">{{ k }}</p>
+
+            <p>
+
+            <button id="{{ k }}~1" class="toggle-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16" >
+                <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+            </svg>
+            </button>
+
+            <button id="{{ k }}~2" class="toggle-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
+                    <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                </svg>
+            </button>
+            </p>
+        </div>
+            <div id="{{ k }}">
+                {% for item in v %}
+                    <p>{{ item.name }}</p>
+                {% endfor %}
+            </div>
+            <hr>
         {% endfor %}
     </div>
 </body>
 </html>
+
+<script type="text/javascript">
+    console.log("hello world");
+
+      $(document).ready(function() {
+            // Cache initialement tous les boutons avec ~2
+            $('button[id$="~2"]').hide();
+
+            $(".toggle-btn").click(function() {
+                const mon_id = $(this).attr('id');
+                const [name, number] = mon_id.split("~");
+
+                if (number === "1") {
+                    // Cache le bouton actuel (~1)
+                    $(this).hide();
+                    // Affiche le div et le bouton avec ~2
+                    $("#" + name).show();
+                    $("#" + name + "\\~2").show();
+                } else if (number === "2") {
+                    // Cache le bouton actuel (~2)
+                    $(this).hide();
+                    // Cache le div et affiche le bouton avec ~1
+                    $("#" + name).hide();
+                    $("#" + name + "\\~1").show();
+                }
+            });
+        });
+
+</script>

@@ -1,0 +1,20 @@
+@font-face {
+    font-family: "Space Mono";
+    src : url("/static/cours/SpaceMono-Bold.ttf") format("truetype");
+}
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Space Mono", sans-serif;
+    background-color: black;
+    color: white;
+    font-size: 25px;
+}
+
+.titre {
+    text-decoration: underline;
+    color: blue;
+    font-style: italic;
+}

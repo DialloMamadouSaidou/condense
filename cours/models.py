@@ -1,4 +1,4 @@
-
+from faker import Faker
 import string
 import io
 from random import choice
@@ -45,7 +45,7 @@ def trois_element(element):
     return element
 
 
-class Programme(models.Model):#Programme
+class Programme(models.Model):  #Programme
     identifiant = models.CharField(unique=True, max_length=50, blank=True)
     name = models.CharField(max_length=50, blank=False, unique=True)
     dp = models.OneToOneField(Profile, on_delete=models.SET_NULL, null=True, verbose_name='directeur_programme')
@@ -59,11 +59,12 @@ class Programme(models.Model):#Programme
         verbose_name_plural = 'Programmes'
 
     def save(self, *args, **kwargs):
-        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(3)]) + '-' + trois_element(self.name)
+        self.identifiant = ''.join(
+            [choice(string.ascii_letters + string.digits) for _ in range(3)]) + '-' + trois_element(self.name)
         super().save(*args, **kwargs)
 
 
-class module(models.Model):     #Matiere
+class module(models.Model):  #Matiere
     identifiant = models.CharField(max_length=110, unique=True, blank=True)
     name = models.CharField(max_length=100, unique=True)
     charge_crs = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
@@ -103,7 +104,7 @@ class module(models.Model):     #Matiere
         super().save(*args, **kwargs)
 
 
-class Chapitre(models.Model):   #Chapitre
+class Chapitre(models.Model):  #Chapitre
     identifiant = models.CharField(max_length=200, unique=True, blank=True)
     name = models.CharField(max_length=200, unique=True)
     module = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
@@ -112,15 +113,17 @@ class Chapitre(models.Model):   #Chapitre
     class Meta:
         unique_together = ('name', 'module')
         ordering = ['module']
+
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(3)]) + trois_element(self.name)
+        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(3)]) + trois_element(
+            self.name)
         super().save(*args, **kwargs)
 
 
-class Lesson(models.Model):#Lesson
+class Lesson(models.Model):  #Lesson
     identifiant = models.CharField(max_length=30, blank=True, unique=True)
     auteur = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     chapitre = models.ForeignKey(Chapitre, on_delete=models.SET_NULL, null=True)
@@ -132,22 +135,25 @@ class Lesson(models.Model):#Lesson
     video_lesson = models.FileField(upload_to='video_crs/', blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(3)]) + trois_element(self.name)
+        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(3)]) + trois_element(
+            self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.name}~{self.auteur}'
 
+
 #Elle va entrez en action lorque l'etudiant choisira ces cours.
 
 
-class Note(models.Model):   #Note par matiere
+class Note(models.Model):  #Note par matiere
     identifiant = models.CharField(max_length=100, blank=True, unique=True)
     professeur = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name='professeur')
     etudiant = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, related_name='Etudiant')
     module = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
     note = models.CharField(max_length=100, blank=True, null=True)
     commentaire = models.CharField(max_length=500, default='Ceci est un commentaire')
+    moyenne = models.CharField(max_length=10, default=0)
 
     def save(self, *args, **kwargs):
         self.identifiant = f"{self.etudiant} {self.module.name}"
@@ -161,13 +167,15 @@ class Note(models.Model):   #Note par matiere
 
     def __str__(self):
         return f"{self.etudiant} {self.module}"
+
+
 #Une table pour le choix Où un etudiant pourra chosir ses cours en fonctions de ses besoins
 #Et surtout en fonction de son domaine
 
 
 class Planification(models.Model):  #Ce modèle consiste juste à planifier les notations
     identifiant = models.CharField(max_length=150, blank=True)
-    professeur = models.ForeignKey(Profile,  on_delete=models.SET_NULL, null=True)
+    professeur = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     matiere = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
     session = models.CharField(max_length=30, default='Session Hiver')
     ponderation = models.CharField(max_length=255, verbose_name='ponderation')
@@ -190,13 +198,15 @@ class Planification(models.Model):  #Ce modèle consiste juste à planifier les 
     def __str__(self):
         return f"Plannification: {self.professeur} {self.matiere}"
 
+
 class Commentaire(models.Model):
     identifiant = models.CharField(max_length=20, blank=True)
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     content = models.CharField(max_length=500, blank=False)
 
     def save(self, *args, **kwargs):
-        self.identifiant = ''.join([choice(string.ascii_letters + string.digits) for _ in range(5)]) + '-' + trois_element(self.user.email)
+        self.identifiant = ''.join(
+            [choice(string.ascii_letters + string.digits) for _ in range(5)]) + '-' + trois_element(self.user.email)
         super().save(*args, **kwargs)
 
 
@@ -242,3 +252,13 @@ class Payer(models.Model):
     def save(self, *args, **kwargs):
         self.identifiant = f"{self.profile} + {self.session} + {self.modules}"
         super().save(*args, **kwargs)
+
+
+class Historique(models.Model):
+    identidiant = models.CharField(max_length=10, blank=True, null=True)
+    interesser = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
+    backup = models.JSONField()
+
+    def save(self, *args, **kwargs):
+        fake = Faker()
+        pass

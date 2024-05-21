@@ -29,17 +29,23 @@ types de possibilités de letudiant -->
 {% block content %}
       <h3>Hello Mamadou Saidou Diallo</h3>
 
-        <h2>Vue d'Charger financier</h2>
+        <h2>Vue Etudiant </h2>
 
-        {% for key, valeur in chapitre.items %}
-            <button value="{{ key }}" class="titres">{{ key }}</button>
-            <div id="{{ key }}">
-                {% for element in valeur %}
-                    <p>{{ element.name }}</p>
-                {% endfor %}
-                <hr>
+        <div class="d-flex justify-content-between">
+            <a class="btn btn-primary" href="#">Relévé</a>
+
+            <a class="btn btn-info" href="#">Paiement</a>
+        </div>
+
+<div class="conteneur">
+        {% for index in liste %}
+
+            <div class="box">
+
+                <a href="{% url 'cours:chapitre' ids=index.identifiant %}">{{ index.name }}</a>
             </div>
         {% endfor %}
+</div>
 {% endblock %}
 
 <!--
