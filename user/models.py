@@ -52,6 +52,8 @@ class MyUser(AbstractBaseUser):
 
     objects = MyUserManager()
 
+    code_secret = models.CharField(max_length=15, blank=True)
+
     def has_perm(self, perm, obj=None):
         return True
 
@@ -66,7 +68,7 @@ class Profile(models.Model):
     #choices = models.CharField(max_length=90, choices=choix, blank=False)
     choices = models.CharField(max_length=90, blank=True)
     domaine_programme = models.CharField(max_length=50, blank=True)#cette colonne me permettra
-    pai = models.CharField(max_length=10, blank=True)
+    #code_secret = models.CharField(max_length=15, blank=True)
     #dajouter le programme auquel letudiant ou le charger de cours doit enseigner
     #qui sera géré au niveau de la création de lutilisateur
 

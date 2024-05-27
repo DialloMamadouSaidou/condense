@@ -1,11 +1,18 @@
 from pprint import pprint
 
+from django.urls import reverse
+from faker import Faker
+
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.db.models.query import QuerySet
 
+from all.settings import EMAIL_HOST_USER
 from .models import MyUser, Profile
 from cours.models import Programme
 # Create your views here.
@@ -179,4 +186,108 @@ def deconnexion(request):
     logout(request)
     return redirect('user:general')
 
+
+def modification_password(request):
+
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        email = request.POST.get('email')
+        #print(request.POST)
+        try:
+            mon_utilisateur = MyUser.objects.get(email=email)
+
+            fake = Faker()
+            code_secret = fake.bothify('###-???;#')
+
+            mon_utilisateur.code_secret = code_secret
+            mon_utilisateur.save()
+
+            subject, from_email, to = "hello", EMAIL_HOST_USER, "saidessai466@gmail.com"
+            text_content = "This is an important message."
+            html_content = f"""
+                    <p>Votre de code de confirmation svp <strong>{code_secret}</strong> </p>"""
+            
+            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
+
+
+
+            messages.success(request, "Code a bien été envoyé!")
+            messages.success(request, "Verifié bien votre email")
+
+            if request.method == "POST":
+                code = request.POST.get("code")
+                print(code)
+            return JsonResponse({"success": True})
+
+
+        except MyUser.DoesNotExist:
+            messages.error(request, "Cet utilisateur na pas de compte dans notre BD!")
+            return JsonResponse(
+                {'success': False, 'message': "Cet utilisateur n'a pas de compte dans notre base de données!"})
+    return render(request, 'user/modifie.html')
+
+
+def user_email(request, ids):
+    # update_session_auth_hash(request, mon_utilisateur)
+    try:
+        user = MyUser.objects.get(email=ids)
+        if request.method == "POST":
+            mot_de_passe = request.POST.get("password", "")
+            confirmation = request.POST.get("confirmation", "")
+
+            if mot_de_passe == "":
+                messages.error(request, "Vous devez entrez votre mot de passe")
+                return redirect(request.path)
+
+            elif mot_de_passe != confirmation:
+                messages.error(request, "Vous devez entrez le meme mot de passe au niveau de la confirmation")
+                return redirect(request.path)
+
+            else:
+                control_erreur = {}
+                control = ControlPassword(mot_de_passe)
+                control = control.general()
+
+                for key, value in control.items():
+                    if key.endswith("f"):
+                        control_erreur[key] = value
+
+                if len(control_erreur) >= 1:
+                    return render(request, 'user/receive_code.html', context={"erreur": control_erreur})
+
+                else:
+                    user.set_password(mot_de_passe)
+                    update_session_auth_hash(request, user)
+                    user.save()
+
+        else:
+            return render(request, "user/receive_code.html")
+
+    except MyUser.DoesNotExist:
+        pass
+
+    return render(request, "user/receive_code.html")
+
+
+def recupere_code(request):
+
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        email = request.POST.get('email')
+        code = request.POST.get('code')
+
+        try:
+            my_user = MyUser.objects.get(email=email)
+
+            if my_user.code_secret == code:
+                return JsonResponse({'success': True, 'message': "Code validé avec succès!", 'redirect_url': reverse('user:connexion')})
+
+            else:
+                return JsonResponse({'success': False})
+
+
+        except MyUser.DoesNotExist:
+            pass
+
+    return render(request, 'user/modifie.html')
 

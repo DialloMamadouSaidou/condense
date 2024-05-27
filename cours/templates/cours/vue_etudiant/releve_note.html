@@ -1,0 +1,58 @@
+{% extends 'base_user.html' %}
+
+{% load static %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block content %}
+
+<h3>Hello Mamadou Saidou!</h3>
+
+
+<table class="table table-bordered bordered-primary">
+
+    <thead>
+
+        <tr>
+            <th scope="col">Matiere</th>
+            <th scope="col">Moyenne</th>
+            <th scope="col">Mention</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for key, value in info.items %}
+       <tr>
+           <td class="col"><a href="#">{{ key }}</a></td>
+           <td class="col">{{ value }}</td>
+
+           {% if value >= 60 %}
+                <td class="col">Valide</td>
+           {% else %}
+                <td class="col">Non Valide</td>
+           {% endif %}
+
+       </tr>
+
+    {% endfor %}
+    <tr>
+
+        <td class="col">MG</td>
+
+        {% if moyenne >= 60 %}
+            <td class="col bg-info">{{ moyenne }}</td>
+            <td class="col">Valide</td>
+        {% else %}
+            <td class="col bg-danger">{{ moyenne }}</td>
+            <td class="col">Non Valide</td>
+        {% endif %}
+    </tr>
+
+    </tbody>
+</table>
+
+{% endblock %}
+

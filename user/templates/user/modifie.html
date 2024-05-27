@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>Changer Password</title>
+    {% load bootstrap5 %}
+    {% bootstrap_javascript %}
+    {% bootstrap_css %}
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+</head>
+<body>
+        <h2>Vue de Modification</h2>
+
+      <h3>Modifier votre mot de passe!</h3>
+
+    <form method="POST" id="mon-form">
+        {% csrf_token %}
+        <label for="email">Email</label>
+        <input type="email" placeholder="Donnez votre email" id="email" name="email">
+
+        <input type="submit" class="btn btn-info" value="soumettre">
+    </form>
+
+
+    <form method="POST" id="code-form" class="form" style="display: none;">
+        {% csrf_token %}
+
+        <label for="code">Entrez votre code</label>
+        <input type="text" id="code" name="code">
+
+        <input type="submit" class="btn btn-danger" value="soumettre">
+    </form>
+
+    {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+
+        {{ message }}
+
+    {% endfor %}
+  </ul>
+{% endif %}
+</body>
+</html>
+<script type="text/javascript">
+
+    $(document).ready(function(){
+
+
+        $( "#mon-form").on("submit", function(e){
+            e.preventDefault();
+
+             $.ajax({
+            type: "POST",
+            url: "{% url 'user:update' %}",
+            data: {
+                email: $("#email").val(),
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response){
+
+                if(response.success){
+                    console.log("hello world");
+                    $("#code-form").show();
+                    $("#mon-form").hide();
+
+                }else {
+                    alert("Cet utilisateur na pas de compte!");
+                }
+
+            },
+            error: function(){
+
+            }
+
+        })
+
+    });
+
+$("#code-form").on("submit", function(e){
+
+e.preventDefault();
+
+
+$.ajax({
+
+    type: "POST",
+    url : "{% url 'user:recupere' %}",
+    data: {
+        email : $("#email").val(),
+        code : $("#code").val(),
+        csrfmiddlewaretoken : $("input[name=csrfmiddlewaretoken]").val()
+    },
+    success : function(response){
+           window.location.href = response.redirect_url; // Redirection après validation
+    },
+    error: function(){
+        console.log("Nous avons rencontré une erreur");
+    }
+})
+
+
+})
+
+})
+</script>

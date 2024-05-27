@@ -6,6 +6,8 @@ from PIL import Image, ImageEnhance
 from io import BytesIO
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail
@@ -476,6 +478,52 @@ def vue_user(request, domaine):
         return render(request, 'cours/vue_etudiant/first_vue.html',
                       context={'liste': liste, 'chapitre': context_cours, 'etudiant': request.user.email})
     return render(request, 'cours/cours_vue_user.html', context={'element': domaine})
+
+
+def releve_note(request, ids):
+
+    try:
+
+        choix = Profile.objects.get(user__email=ids)
+
+        if choix.choices == "etudiant":
+            validate_email(ids)
+            info_etudiant = {}
+            moyenne = 0
+            mes_notes = Note.objects.filter(etudiant__user__email="saidessai466@gmail.com")
+
+            info_etudiant = {item.module: eval(item.moyenne) for item in mes_notes}
+
+            moyenne = round(sum(info_etudiant.values()) / len(info_etudiant), 5)
+
+            return render(request, 'cours/vue_etudiant/releve_note.html', context={"info": info_etudiant, "moyenne": moyenne})
+
+        else:
+            return HttpResponse("Vous navez pas de releve de note à verifier")
+
+    except Profile.DoesNotExist:
+        return HttpResponse("Ce profile nexiste pas!")
+
+    except ValidationError:
+        return HttpResponse("Entrez un mail valide!")
+
+
+def detail_only_note(request):
+
+    matiere = "Element de Programmation"
+    etudiant_email = "saidessai466@gmail.com"
+
+    try:
+        #Pour recuperer la note de letudiant Problematique letudiant, qui aura redouble en ajoutant la session
+            matieres = Planification.objects.get(matiere__name=matiere)
+            note_etudiant = Note.objects.get(identifiant=f"{Profile.objects.get(user__email=etudiant_email)} {module.objects.get(name=matiere)}")
+            print(note_etudiant.note)
+    except Planification.DoesNotExist:
+        print("hI MAMADOU")
+    except Note.DoesNotExist:
+        print("Desolé la note pour cette ma/3 nexitste pas!")
+
+    return render(request, 'cours/vue_etudiant/only_note.html')
 
 
 #Pause de développement pour finir d'abord avec le choix de cours pour les étudiants.

@@ -154,6 +154,7 @@ class Note(models.Model):  #Note par matiere
     note = models.CharField(max_length=100, blank=True, null=True)
     commentaire = models.CharField(max_length=500, default='Ceci est un commentaire')
     moyenne = models.CharField(max_length=10, default=0)
+    session = models.CharField(max_length=50, default="Automne 2024")
 
     def save(self, *args, **kwargs):
         self.identifiant = f"{self.etudiant} {self.module.name}"

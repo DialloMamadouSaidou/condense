@@ -10,13 +10,13 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
 
-    <link rel="stylesheet" href="{% static 'cours/css/first_style.css' %}">
+    <link rel="stylesheet" href="{% static 'cours/css/secondstyle.css' %}">
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 </head>
 <body>
     <h3>Mes Chapitres</h3>
     <!--<button class="btn btn-primary">Crée un Chapitre</button>-->
-
+    <a href="#">Note</a>
     <div id="chapitre">
 
 
@@ -42,7 +42,7 @@
         </div>
             <div id="{{ k }}">
                 {% for item in v %}
-                    <p>{{ item.name }}</p>
+                    <p class="lien"><a href="#">{{ item.name }}</a></p>
                 {% endfor %}
             </div>
             <hr>
