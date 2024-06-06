@@ -46,3 +46,6 @@ $('#choix').change(function(){
     }
     console.log(element);
 })
+
+
+console.log("Allo Mamadou Saidou Diallo");

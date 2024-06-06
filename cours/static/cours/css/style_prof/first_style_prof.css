@@ -5,10 +5,35 @@
 
 @font-face {
     font-family: "Space Mono";
-        src : url("/static/cours/SpaceMono-Italic.ttf") format("truetype");
+        src : url("/static/cours/SpaceMono-Bold.ttf") format("truetype");
 }
 body {
     font-family: "Space Mono", sans-serif;
     background-color: black;
+    color: green;
+    font-size: 25px;
+}
+
+a {
+    text-decoration: none;
     color: white;
 }
+
+.conteneur {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+}
+
+.item {
+
+   border: 2px solid black;
+   with: 200px;
+   height: 50px;
+   padding: 10px;
+   margin-bottom: 5px;
+   font-style: italic;
+   background-color: blue;
+}
+

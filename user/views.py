@@ -15,6 +15,8 @@ from django.db.models.query import QuerySet
 from all.settings import EMAIL_HOST_USER
 from .models import MyUser, Profile
 from cours.models import Programme
+
+
 # Create your views here.
 
 
@@ -56,6 +58,7 @@ class ControlPassword:
             self.said['digf'] = "Veuillez ajouter au moins un nombre"
 
         return self.said
+
     def isalnumcharacter(self):
         index = False
         for item in self.password:
@@ -69,7 +72,6 @@ class ControlPassword:
 
         return self.said
 
-
     def general(self):
         self.digit()
         self.controlen()
@@ -80,6 +82,7 @@ class ControlPassword:
     def __str__(self):
         return f"Le mot de passe est {self.password}"
 
+
 #
 def createuser(request):
     all_programme = Programme.objects.all()
@@ -87,8 +90,8 @@ def createuser(request):
     if request.method == 'POST':
         all_programmes = Programme.objects.all()
         liste = all_programme
-        context_choix, non_respect_password_contrainte, context_confirmation, context_empty, context_password = {}, {}, {}, {}, {} #Ce sont des dict pour verifier si les données sont rempli ou pas, et le dict
-        mykey = [] #verfier la qualite du mpt de passe
+        context_choix, non_respect_password_contrainte, context_confirmation, context_empty, context_password = {}, {}, {}, {}, {}  #Ce sont des dict pour verifier si les données sont rempli ou pas, et le dict
+        mykey = []  #verfier la qualite du mpt de passe
         choix = request.POST.get('choix')
         email = request.POST.get('email', '')
         name = request.POST.get('name', '')
@@ -109,10 +112,10 @@ def createuser(request):
         context_empty["all"] = all_programmes
         print(len(context_empty))
         if 1 < len(context_empty) <= 5:
-                return render(request, 'user/createuser.html', context=context_empty)
+            return render(request, 'user/createuser.html', context=context_empty)
 
         elif len(context_empty) == 1:
-            if password != confirmation:    #Ce context verifie si les mots de passeses entrés sont les mêmes
+            if password != confirmation:  #Ce context verifie si les mots de passeses entrés sont les mêmes
                 context_confirmation['confirmation'] = "Assurez vous d'avoir entré le même password"
                 context_confirmation['all'] = all_programmes
                 return render(request, 'user/createuser.html', context=context_confirmation)
@@ -128,7 +131,7 @@ def createuser(request):
 
                 #print(len(mykey))
                 if len(mykey) != 0:
-                    non_respect_password_contrainte['bien'] = mykey #il
+                    non_respect_password_contrainte['bien'] = mykey  #il
                     non_respect_password_contrainte["all"] = all_programmes
                     for key, val in non_respect_password_contrainte.items():
                         print(key, val)
@@ -156,6 +159,7 @@ def createuser(request):
 
     return render(request, 'user/createuser.html', context={'all': all_programme})
 
+
 #NB:A noter bien que les HttpResponse seront remplacés par des render avec des vues plus completes
 def authentification(request):
     if request.method == 'POST':
@@ -171,15 +175,17 @@ def authentification(request):
             print(the_profile.choices)
             return redirect('cours:vue_user', domaine=the_profile.choices)
         elif user is None:
-            return render(request, 'user/authenticate.html', context={'email': 'Verifiez bien le mail', 'password': 'Verifiez bien le password'})
+            return render(request, 'user/authenticate.html',
+                          context={'email': 'Verifiez bien le mail', 'password': 'Verifiez bien le password'})
 
         return HttpResponseRedirect(request.path)
     return render(request, 'user/authenticate.html')
 
 
-def vue_general(request): #La première page du site elle dois servir de page d'attraction pour les user
+def vue_general(request):  #La première page du site elle dois servir de page d'attraction pour les user
     #La vue dois être la vue principal
     return render(request, 'user/vu_general.html')
+
 
 @login_required
 def deconnexion(request):
@@ -188,7 +194,6 @@ def deconnexion(request):
 
 
 def modification_password(request):
-
     if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         email = request.POST.get('email')
         #print(request.POST)
@@ -205,12 +210,10 @@ def modification_password(request):
             text_content = "This is an important message."
             html_content = f"""
                     <p>Votre de code de confirmation svp <strong>{code_secret}</strong> </p>"""
-            
+
             msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
             msg.attach_alternative(html_content, "text/html")
             msg.send()
-
-
 
             messages.success(request, "Code a bien été envoyé!")
             messages.success(request, "Verifié bien votre email")
@@ -271,7 +274,6 @@ def user_email(request, ids):
 
 
 def recupere_code(request):
-
     if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         email = request.POST.get('email')
         code = request.POST.get('code')
@@ -280,7 +282,8 @@ def recupere_code(request):
             my_user = MyUser.objects.get(email=email)
 
             if my_user.code_secret == code:
-                return JsonResponse({'success': True, 'message': "Code validé avec succès!", 'redirect_url': reverse('user:connexion')})
+                return JsonResponse(
+                    {'success': True, 'message': "Code validé avec succès!", 'redirect_url': reverse('user:connexion')})
 
             else:
                 return JsonResponse({'success': False})
@@ -291,3 +294,12 @@ def recupere_code(request):
 
     return render(request, 'user/modifie.html')
 
+
+def live_create(request):
+    email = list(Profile.objects.all().values('user__email'))
+
+    email = [k for dico in email for k in dico.values()]
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpResponse":
+        pass
+    vrai_mail = Profile.objects.filter(user__email="said")
+    return render(request, 'user/createuser.html')

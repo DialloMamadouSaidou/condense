@@ -10,4 +10,7 @@
 {% block content %}
 
     <h2>Hello Mamadou Saidou Diallo</h2>
+
+        <iframe src="{% url 'cours:serve_pdf' name=name %}" width="100%" height="600px"></iframe>
+
 {% endblock %}

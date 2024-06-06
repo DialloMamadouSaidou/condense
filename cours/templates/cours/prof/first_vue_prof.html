@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_user.html' %}
 {% load static %}
 
 {% block css %}
@@ -7,9 +7,14 @@
 
 {% block content %}
 
+
     <h3>Hello Monsieur Comment allez vous?</h3>
+    <div class="conteneur">
 
     {% for item in courses %}
-        <p><a href="{% url 'cours:chapitre' ids=item.identifiant %}">{{ item.name }}</a></p>
+        <div class="item">
+                        <a href="{% url 'cours:chapitre' ids=item.identifiant %}">{{ item.name }}</a>
+        </div>
     {% endfor %}
+    </div>
 {% endblock %}

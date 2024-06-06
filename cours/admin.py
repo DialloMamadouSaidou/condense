@@ -68,3 +68,10 @@ class Planifier(admin.ModelAdmin):
         'matiere',
         'session'
     )
+
+@admin.register(Create_groupe)
+class Create_groupe(admin.ModelAdmin):
+    list_display = (
+        'professeur',
+        'matiere'
+    )

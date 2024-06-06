@@ -1,5 +1,8 @@
+import json
+import os
 import re
 from datetime import datetime, date, time, timedelta
+from pathlib import Path
 from pprint import pprint
 from collections import defaultdict, deque
 from PIL import Image, ImageEnhance
@@ -8,9 +11,10 @@ from io import BytesIO
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail
+from reportlab.lib.pagesizes import letter
 
 from user.models import *
 
@@ -416,7 +420,7 @@ def noter_etudiant(request, mat):
         return HttpResponse("<h2>Cette matière n'a pas été pondéré dabord pour donner une note </h2>")
 
 
-@login_required
+
 def vue_user(request, domaine):
     #pour le charge de cours à revoir poour optimiser le code
     if domaine == 'charge_cours':
@@ -496,7 +500,7 @@ def releve_note(request, ids):
 
             moyenne = round(sum(info_etudiant.values()) / len(info_etudiant), 5)
 
-            return render(request, 'cours/vue_etudiant/releve_note.html', context={"info": info_etudiant, "moyenne": moyenne})
+            return render(request, 'cours/vue_etudiant/releve_note.html', context={"info": info_etudiant, "moyenne": moyenne, "email": request.user.email})
 
         else:
             return HttpResponse("Vous navez pas de releve de note à verifier")
@@ -508,23 +512,51 @@ def releve_note(request, ids):
         return HttpResponse("Entrez un mail valide!")
 
 
-def detail_only_note(request):
 
-    matiere = "Element de Programmation"
-    etudiant_email = "saidessai466@gmail.com"
+def serve_pdf(request, name):
+    pdf_path = os.path.join(settings.MEDIA_ROOT, "pdfs")
+    pdf_path = os.path.join(pdf_path, name)
+    if not os.path.exists(pdf_path):
+        return HttpResponse("Le fichier PDF n'existe pas.", content_type='text/plain')
+    return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
+
+
+def detail_only_note(request, email, name):
 
     try:
+        mon_user = Profile.objects.get(user__email=request.user.email)
+        print(mon_user.choices)
+        matiere = name
+        etudiant_email = email
+
+        try:
         #Pour recuperer la note de letudiant Problematique letudiant, qui aura redouble en ajoutant la session
             matieres = Planification.objects.get(matiere__name=matiere)
             note_etudiant = Note.objects.get(identifiant=f"{Profile.objects.get(user__email=etudiant_email)} {module.objects.get(name=matiere)}")
-            print(note_etudiant.note)
-    except Planification.DoesNotExist:
-        print("hI MAMADOU")
-    except Note.DoesNotExist:
-        print("Desolé la note pour cette ma/3 nexitste pas!")
+            #print(note_etudiant.note)
+            #print(note_etudiant.moyenne)
+            liste_data = []
 
-    return render(request, 'cours/vue_etudiant/only_note.html')
+            liste = [[k, v] for dico in eval(note_etudiant.note) for k, v in dico.items()]
+            liste = deque(liste)
+            liste.appendleft(['Examen', 'Note'])
+            liste.append(["Moyenne", note_etudiant.moyenne])
+            #print(liste)
+            liste = list(liste)
+            pdf_path = create_pdf(name, liste)
 
+            return render(request, 'cours/vue_etudiant/only_note.html', context={"pdf_path": pdf_path, "name": name})
+
+        except Planification.DoesNotExist:
+            return HttpResponse("le quota de cette matière nest pas donné encore")
+        except Note.DoesNotExist:
+            return HttpResponse("Letudiant na pas de note dans cette matiere dabord!")
+
+    except Profile.DoesNotExist:
+        return HttpResponse("Vous navez pas de compte!") #Code à rectifier
+
+    name = f"{email}~{name}.pdf"
+    return render(request, 'cours/vue_etudiant/only_note.html', {"name": name})
 
 #Pause de développement pour finir d'abord avec le choix de cours pour les étudiants.
 #######################################################################################################################
@@ -565,7 +597,6 @@ def detail_paiement(request, etud):
 
     else:
         return HttpResponse("<h3>Vous navez pas droit à cette vue </h3>")
-
 
 """
     Pour l'etudiant:
@@ -642,3 +673,49 @@ def choix_cours(request):
                       context={'module_choices_name': liste1_not, 'not_choice': liste1_contient})
 
     return HttpResponse("<h1>Vous ne pouvez pas faire de choix de cours car vous n'êtes pas etudiant</h1>")
+
+
+def creation_group(request):
+    user = Profile.objects.all()
+
+    user2 = Profile.objects.get(user__email=request.user.email)
+    choix = user2.choices
+
+    matiere = "Element de Programmation"
+
+    mon_module = module.objects.get(name="Element de Programmation")
+
+    print(mon_module.charge_crs)
+    #print(choix)
+    create_concerne = Create_groupe.objects.filter(professeur=user2).filter(matiere=mon_module)
+    print(len(create_concerne))
+    les_concerne = Choix_Cours.objects.filter(cours__contains=matiere).values("user__user__email")
+
+    #print(les_concerne)
+    mes_etudiants = [value for item in les_concerne for key, value in item.items() ]
+    print(mes_etudiants)
+
+    if choix == "etudiant":
+        pass
+
+    elif choix == "charge_cours":
+        if len(create_concerne) > 0:
+            #bien retoucher
+            return HttpResponse("Ce cours possède dejà des groupes")
+
+        else:
+            if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+                cours_list = ""
+                nb = request.POST.get("nb")  # nbre de personne
+                nb_groupe = request.POST.get("nb_chap")  # nbre de groupe
+
+                # print(etudiant)
+                # all_etudiant = Choix_Cours.objects.get(cours=module).values("user__user__email")
+                # print(all_etudiant)
+                if nb_groupe != "" and isinstance(eval(nb_groupe), int):
+                    return JsonResponse({"saidou": nb})
+            return render(request, 'cours/prof/group_create.html', context={"mes_user": user, "longueur": len(user)})
+
+
+def notation_groupe(request):
+    pass

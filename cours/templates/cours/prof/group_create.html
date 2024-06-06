@@ -1,0 +1,62 @@
+{% extends 'base_user.html' %}
+
+{% block css %}
+
+{% endblock %}
+{% block content %}
+
+    <h3>Hello Mamadou Saidou</h3>
+
+<h2>Voici la liste des etudiants: Nbre total {{ longueur }}</h2>
+
+<div id="mes_users">
+    {% for item in mes_user %}
+        <p>{{ item }}</p>
+    {% endfor %}
+</div>
+
+
+<p id="nbre"></p>
+<p id="titre"></p>
+
+<form method="POST" id="mon_formulaire">
+        {% csrf_token %}
+        <input type="text" placeholder="Entrez Le nombre delement" name="name" id="name">
+        <input type="text" placeholder="Le nombre de groupe" name="nb_chap" id="nb_chap" min="2">
+        <input type="submit" value="soumettre">
+</form>
+
+<script type="text/javascript">
+    console.log("hello world");
+
+$(document).ready(function(){
+    $("#mon_formulaire").on("submit", function(e){
+        e.preventDefault();
+
+    $.ajax({
+
+    type: "POST",
+    url: "{% url 'cours:create_group' %}",
+
+    data: {
+        nb: $("#name").val(),
+        nb_chap: $("#nb_chap").val(),
+        csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
+    },
+    success: function(response){
+        console.log(response.saidou);
+        let mon_nombre = $("#name").val();
+        $("#mes_users").empty();
+        $("#name").val("");
+        $("#nb_chap").val("");
+
+        $("#nbre").html(response.saidou);
+    }
+
+    })
+
+    })
+
+})
+</script>
+{% endblock %}

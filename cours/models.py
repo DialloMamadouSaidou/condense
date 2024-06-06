@@ -156,6 +156,7 @@ class Note(models.Model):  #Note par matiere
     moyenne = models.CharField(max_length=10, default=0)
     session = models.CharField(max_length=50, default="Automne 2024")
 
+
     def save(self, *args, **kwargs):
         self.identifiant = f"{self.etudiant} {self.module.name}"
         super().save(*args, **kwargs)
@@ -255,6 +256,7 @@ class Payer(models.Model):
         super().save(*args, **kwargs)
 
 
+#Cette table sera juste pour les modifications et les suppressions
 class Historique(models.Model):
     identidiant = models.CharField(max_length=10, blank=True, null=True)
     interesser = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
@@ -263,3 +265,24 @@ class Historique(models.Model):
     def save(self, *args, **kwargs):
         fake = Faker()
         pass
+
+#Cette vue est chargé de géré les infos du groupe genre le choix et la note
+
+class Create_groupe(models.Model):
+    identifiant = models.CharField(max_length=130, unique=True, blank=True, default="grp-1")
+    #name = models.CharField(max_length=5, unique=True)
+    professeur = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
+    matiere = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
+    concerne = models.CharField(max_length=500, blank=True)
+    note = models.CharField(max_length=4, blank=True)
+    document_file = models.FileField(blank=True)
+
+    def save(self, *args, **kwargs):
+        fake = Faker()
+
+        self.identifiant = fake.bothify(f"Grp-##~??~{self.matiere}~{self.professeur}")
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.identifiant

@@ -6,9 +6,18 @@ image = image.enhance(1.0)
 image = ImageEnhance.Sharpness(image)
 image.enhance(2.6).show()
 """
+import os
 import time
 from pprint import pprint
 from collections import defaultdict, deque
+from django.conf import settings
+from faker import Faker
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import LETTER
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 
 class file_verify:
@@ -61,9 +70,6 @@ def moyenne(liste_note: list) -> float:
         somme += item
 
     return round(somme / len(liste_note), 4)
-
-
-
 
 
 def decortique(dico: dict):
@@ -157,7 +163,6 @@ def regroupe_synchronise(liste1: list, liste2: list) -> list:
         return liste_total
 
 
-
 def calcul_moyenne(liste_note: list, majoration: list):
     notes = 0
     dico_note = defaultdict(list)
@@ -169,7 +174,7 @@ def calcul_moyenne(liste_note: list, majoration: list):
             ponderation = key.split('~')[-1]
 
             if note != '':
-               notes += notation(majoration[i], eval(note)) * eval(ponderation)
+                notes += notation(majoration[i], eval(note)) * eval(ponderation)
 
             else:
                 note = 0
@@ -177,11 +182,107 @@ def calcul_moyenne(liste_note: list, majoration: list):
 
     return round(notes / 100.0, 4)
 
+
+def create_pdf(name_pdf, data):
+    path = os.path.join(settings.MEDIA_ROOT, "pdfs")
+    os.makedirs(path, exist_ok=True)
+    path = os.path.join(path, name_pdf)
+
+    fake = Faker()
+    code = fake.bothify('?????###-??-\?;???')
+    document = SimpleDocTemplate(
+        path,
+        pagesize=LETTER,
+        title="Relevé de note"
+    )
+
+
+    col_width = [250, 100, 100]
+    row_height = [70] * len(data)
+    table = Table(data, rowHeights=row_height, colWidths=col_width)
+
+
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.Color(117, 195, 95)),
+        ("FONTNAME", (0, 0), (-1, -1), "Courier-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 14),
+        ('TEXTALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 25),
+        ('LEFTPADDING', (0, 0), (-1, -1), 15),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.blue)
+
+    ])
+
+    table.setStyle(style)
+
+    for item in range(1, len(data)):
+        if item % 2 == 0:
+            bc = colors.burlywood
+        else:
+            bc = colors.beige
+
+        ts = TableStyle([
+            ("BACKGROUND", (0, item), (-1, item), bc)
+
+        ])
+
+        table.setStyle(ts)
+
+    ts = TableStyle([
+
+        ("GRID", (0, 0), (-1, -1), 2, colors.black)
+    ])
+    spacer = Spacer(1, 12)
+    table.setStyle(ts)
+    element = []
+
+    style = getSampleStyleSheet()
+
+    text = f"""
+        Allo Mamadou Saidou,
+        comment vas tu, je vais bien
+        Hello Mamadou Saidou Diallo
+        hmdl et la famille de ton coté sa roule jespère <br></br>
+        <i color="blue">{code}</i>
+    """
+
+    custom_style = ParagraphStyle(
+        name='Custom Style',
+        parent=style["Normal"],
+        fontName='Courier-Bold',
+        fontSize=25,
+        leading=25,
+        Alignment=1,
+        spaceAfter=20,
+        textColor=colors.brown
+
+    )
+    paragraph_text = Paragraph(text, custom_style)
+
+    element = [paragraph_text, spacer, table]
+
+
+    document.build(element)
+
+    return path
+
 if __name__ == "__main__":
+    data = [
+        ["Examen", "Note"],
+        ["exam1", 20],
+        ["exam2", 40]
+    ]
     liste_etudiant = [{'exam1~80': '10'}, {'exam2~20': '16'}]
 
-        # Les données pour les autres étudiants suivent ici...
+    #create_pdf("document.pdf", data)
 
+    tableau = [
+        {'a': 1, 'b': 2, 'c': 3},
+        {'d': 4, 'e': 5},
+        {'f': 6, 'g': 7, 'h': 8}
+    ]
 
-    print(calcul_moyenne(liste_etudiant, [20, 20]))
+    # Extraction des clés et valeurs dans une liste globale
+    resultat = [[k, v] for dico in tableau for k, v in dico.items()]
 
+    print(resultat)

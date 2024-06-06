@@ -26,7 +26,7 @@
 
     {% for key, value in info.items %}
        <tr>
-           <td class="col"><a href="#">{{ key }}</a></td>
+           <td class="col"><a href="{% url 'cours:only' email=email name=key %}">{{ key }}</a></td>
            <td class="col">{{ value }}</td>
 
            {% if value >= 60 %}

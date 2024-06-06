@@ -24,5 +24,10 @@ urlpatterns = [
     path('note/<str:mat>', noter_etudiant, name='note_etudiant'),    #Cette vue consiste à noté mes etudiants
     path('ponde/<str:mod>', give_note_max, name='ponde'),
     path('releve_note/<str:ids>', releve_note, name="releve"),
-    path('only', detail_only_note, name="only")
+    path('only/<str:email>/<str:name>', detail_only_note, name="only"),
+
+    #path('generate-pdf/<str:name>', generate_pdf_view, name='generate_pdf'),
+    path('serve-pdf/<str:name>', serve_pdf, name='serve_pdf'),
+
+    path('create', creation_group, name='create_group')
 ]

@@ -11,6 +11,7 @@ urlpatterns = [
     path('modifie', modification_password, name='update'),
     path('recode/<str:ids>', user_email, name="receive"),
 
-    path('recupere', recupere_code, name="recupere")
+    path('recupere', recupere_code, name="recupere"),
+    path('live', live_create, name="live")
     #path('^choix_programme/(?P<str:email>)/(%%<str:name>)/($&<str:choix>)/(&&<str:password>)/$', choix_du_programme, name='choix_du_programme')
 ]

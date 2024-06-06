@@ -84,4 +84,23 @@
 </div>
 </body>
 </html>
-<script type="text/javascript" src="{% static 'jss/create.js' %}"></script>
+<script type="text/javascript" src="{% static 'jss/create.js' %}">
+    $(document).read(function(){
+        function submitForm(){
+            $.ajax({
+
+            type: "POST",
+            url : "{% url 'user:live' %}",
+            data : {
+                email
+            },
+            success: {
+                consle.log("hello world!");
+            }
+        })
+
+        }
+
+
+    })
+</script>

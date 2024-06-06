@@ -41,7 +41,7 @@
             <p class="error">{{ password }}</p>
             <div class="d-flex justify-content-around">
             <p><a href="#">crée un compte</a></p>
-            <p><a href="#">Mot de passe oublié</a></p>
+            <p><a href="{% url 'user:recupere' %}">Mot de passe oublié</a></p>
             </div>
         <input type="submit" class="btn btn-primary w-100" value="Login" id="login">
     </form>
