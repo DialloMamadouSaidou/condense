@@ -268,14 +268,15 @@ class Historique(models.Model):
 
 #Cette vue est chargé de géré les infos du groupe genre le choix et la note
 
+
 class Create_groupe(models.Model):
     identifiant = models.CharField(max_length=130, unique=True, blank=True, default="grp-1")
     #name = models.CharField(max_length=5, unique=True)
     professeur = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     matiere = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
-    concerne = models.CharField(max_length=500, blank=True)
+    concerne = models.TextField(blank=True)
     note = models.CharField(max_length=4, blank=True)
-    document_file = models.FileField(blank=True)
+    #document_file = models.FileField(blank=True)
 
     def save(self, *args, **kwargs):
         fake = Faker()

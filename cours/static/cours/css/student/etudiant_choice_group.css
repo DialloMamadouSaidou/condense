@@ -1,0 +1,21 @@
+@font-face {
+    font-family: "Mono Space";
+    src: url("/static/cours/SpaceMono-Bold.ttf") format("truetype");
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Mono Space";
+    background-color: black;
+    color: white;
+}
+
+.icon-erreur {
+    margin-top: 1px;
+    font-size: 20px;
+}
+

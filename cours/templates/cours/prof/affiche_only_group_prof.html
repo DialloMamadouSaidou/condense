@@ -1,0 +1,61 @@
+{% extends 'base_user.html' %}
+
+{% load static %}
+
+{% block css %}
+<!-- Vos CSS ici -->
+{% endblock %}
+
+{% block content %}
+
+<h2>Hello Mamadou Saidou</h2>
+
+<h1>Les repartitions des notes!</h1>
+
+<div class="conteneur">
+    {% for group in mes_elements %}
+        {% for group_number, details in group.items %}
+            <div id="groupe-{{ group_number }}">
+                <h3>GROUPE {{ group_number }}</h3>
+
+                <div class="content1 d-flex justify-content-between">
+                    <!-- Liste des étudiants -->
+                    <div class="conteneur">
+                        <ul class="list-group">
+                            <li class="list-group-item active">Étudiants</li>
+                            {% for etudiant in details.etudiant %}
+                                <li class="list-group-item">{{ etudiant }}</li>
+                            {% empty %}
+                                <li class="list-group-item">Aucun étudiant</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="note">
+                        <p class="list-group-item active">Notes</p>
+                        {% for note in details.Note %}
+                            <p>{{ note }}</p>
+                        {% empty %}
+                            <p>Aucune note</p>
+                        {% endfor %}
+                        <input type="text" placeholder="Entrez ici la note du groupe">
+                    </div>
+
+                    <!-- Fichiers -->
+                    <div class="files">
+                        <p class="list-group-item active">Fichiers</p>
+                        {% for file in details.file %}
+                            <p>{{ file }}</p>
+                        {% empty %}
+                            <p>Aucun fichier</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <hr>
+        {% endfor %}
+    {% endfor %}
+</div>
+
+{% endblock %}

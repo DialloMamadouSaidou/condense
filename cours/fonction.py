@@ -74,6 +74,7 @@ def moyenne(liste_note: list) -> float:
 
 def decortique(dico: dict):
     """
+    Fonction pour un cas bcp specifique.
     Cette fonction permet de casser un dictionnaire donné en paramètre en donnant juste des clés
     Mais attention on parle dici de dico vraiment complexe.
     La fonction est utilisé dans la vue give_note_max pour donner a chaque exam une note max.
@@ -196,11 +197,9 @@ def create_pdf(name_pdf, data):
         title="Relevé de note"
     )
 
-
     col_width = [250, 100, 100]
     row_height = [70] * len(data)
     table = Table(data, rowHeights=row_height, colWidths=col_width)
-
 
     style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.Color(117, 195, 95)),
@@ -261,12 +260,104 @@ def create_pdf(name_pdf, data):
 
     element = [paragraph_text, spacer, table]
 
-
     document.build(element)
 
     return path
 
+
+class gere_note_groupe:
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return self.name
+
+    def recherche_element(self, element) -> int:    #Cette fonction verifie si un groupe existe ou pas
+
+        liste_groupe = [key for item in self.name for key in item]
+        if element in liste_groupe:
+            return liste_groupe.index(element)
+
+        else:
+            return -1
+
+    def ajout_note(self, groupe: int, note: float):
+        reponse = self.recherche_element(groupe)
+        if reponse != -1:
+            element = self.name[reponse]
+            for value in element.values():
+                value["Note"] = str(note)
+        else:
+                raise ValueError("Ce numéro de groupe nexiste pas!")
+
+    def ajout_etudiant(self, groupe: int, etudiant):
+        reponse = self.recherche_element(groupe)
+        if reponse != -1:
+            if self._rechercher_etudiant(etudiant) == -1:
+                element = self.name[reponse]
+                for value in element.values():
+                    value["ETUDIANT"].append(etudiant)
+
+            else:
+                print(f"Cet etudiant existe déjà dans le groupe {self._rechercher_etudiant(etudiant)}")
+        else:
+            print("Le groupe nexiste pas!")
+
+    def supprimer_etudiant(self, groupe, etudiant):
+        reponse = self.recherche_element(groupe)
+        if reponse != -1:
+            element = self.name[reponse]
+            for value in element.values():
+                value["ETUDIANT"].remove(etudiant)
+        else:
+            pass
+
+    def supprimer_note(self, groupe, etudiant):
+        pass
+
+    def ajout_fichier(self, groupe, file):
+        pass
+
+    def _rechercher_etudiant(self, etudiant):
+
+        if etudiant in [i for item in self.name for key, value in item.items() for i in value["ETUDIANT"]]:
+            for item in self.name:
+                for key, value in item.items():
+                    if etudiant in value["ETUDIANT"]:
+                        return key
+        else:
+            return -1
+
+    #la place limite est automatiquement instauré dans la création de ma table
+    #la place disponible que je dois calculé
+    def place_limite_and_available(self):
+        ma_reference = {}
+        for item in mon_dico:
+            for key, value in item.items():
+                ma_reference[key] = value["limit"] - len(value["ETUDIANT"])
+
+        print(ma_reference)
+
 if __name__ == "__main__":
+    mon_dico = [{1: {"ETUDIANT": ["Mamadou", "Saidou"], "Note": "", "limit":   4}}, {2: {"ETUDIANT": ["Diallo"], "Note": "5", "limit": 4}}]
+    essaie_note = gere_note_groupe(mon_dico)
+    essaie_note.ajout_note(2, 5)
+    essaie_note.ajout_etudiant(1, "Diallo")
+    essaie_note.ajout_etudiant(2, "Mamadou")
+    essaie_note.ajout_etudiant(2, "Saidou")
+    #essaie_note.supprimer_etudiant(2, "Saidou")
+    print(mon_dico)
+    essaie_note.place_limite_and_available()
+    #element = essaie_note.rechercher_etudiant("Saidou")
+    #print(element)
+    #print(mon_dico)
+    #indexi = essaie_note.recherche_element(2)
+    #for value in mon_dico[indexi].values():
+     #   value["Note"] = "45"
+
+    #print(mon_dico)
+    """
+    
     data = [
         ["Examen", "Note"],
         ["exam1", 20],
@@ -286,3 +377,4 @@ if __name__ == "__main__":
     resultat = [[k, v] for dico in tableau for k, v in dico.items()]
 
     print(resultat)
+    """

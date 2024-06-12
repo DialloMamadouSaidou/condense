@@ -14,6 +14,7 @@ from django.core.validators import validate_email
 from django.http import HttpResponse, FileResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail
+from django.urls import reverse
 from reportlab.lib.pagesizes import letter
 
 from user.models import *
@@ -395,7 +396,6 @@ def noter_etudiant(request, mat):
 
             liste_note = [eval(item) for item in eval(element.majoration)]
 
-
             #Il me faut une fonction qui va me servir à ajouter des éléments à cette liste de note pour la synchroniser chaque fois
             for k, v in dict_bd.items():
                 etudiant = Profile.objects.get(user__email=k)
@@ -412,13 +412,11 @@ def noter_etudiant(request, mat):
 
             return redirect(request.path)
 
-
         return render(request, 'cours/prof/noter_etudiant.html',
                       context={'etudiant': liste_etudiant, 'ponde': ponderation_finale, 'note': dico_note})
 
     else:
         return HttpResponse("<h2>Cette matière n'a pas été pondéré dabord pour donner une note </h2>")
-
 
 
 def vue_user(request, domaine):
@@ -485,7 +483,6 @@ def vue_user(request, domaine):
 
 
 def releve_note(request, ids):
-
     try:
 
         choix = Profile.objects.get(user__email=ids)
@@ -500,7 +497,8 @@ def releve_note(request, ids):
 
             moyenne = round(sum(info_etudiant.values()) / len(info_etudiant), 5)
 
-            return render(request, 'cours/vue_etudiant/releve_note.html', context={"info": info_etudiant, "moyenne": moyenne, "email": request.user.email})
+            return render(request, 'cours/vue_etudiant/releve_note.html',
+                          context={"info": info_etudiant, "moyenne": moyenne, "email": request.user.email})
 
         else:
             return HttpResponse("Vous navez pas de releve de note à verifier")
@@ -512,7 +510,6 @@ def releve_note(request, ids):
         return HttpResponse("Entrez un mail valide!")
 
 
-
 def serve_pdf(request, name):
     pdf_path = os.path.join(settings.MEDIA_ROOT, "pdfs")
     pdf_path = os.path.join(pdf_path, name)
@@ -522,7 +519,6 @@ def serve_pdf(request, name):
 
 
 def detail_only_note(request, email, name):
-
     try:
         mon_user = Profile.objects.get(user__email=request.user.email)
         print(mon_user.choices)
@@ -530,9 +526,10 @@ def detail_only_note(request, email, name):
         etudiant_email = email
 
         try:
-        #Pour recuperer la note de letudiant Problematique letudiant, qui aura redouble en ajoutant la session
+            #Pour recuperer la note de letudiant Problematique letudiant, qui aura redouble en ajoutant la session
             matieres = Planification.objects.get(matiere__name=matiere)
-            note_etudiant = Note.objects.get(identifiant=f"{Profile.objects.get(user__email=etudiant_email)} {module.objects.get(name=matiere)}")
+            note_etudiant = Note.objects.get(
+                identifiant=f"{Profile.objects.get(user__email=etudiant_email)} {module.objects.get(name=matiere)}")
             #print(note_etudiant.note)
             #print(note_etudiant.moyenne)
             liste_data = []
@@ -553,10 +550,11 @@ def detail_only_note(request, email, name):
             return HttpResponse("Letudiant na pas de note dans cette matiere dabord!")
 
     except Profile.DoesNotExist:
-        return HttpResponse("Vous navez pas de compte!") #Code à rectifier
+        return HttpResponse("Vous navez pas de compte!")  #Code à rectifier
 
     name = f"{email}~{name}.pdf"
     return render(request, 'cours/vue_etudiant/only_note.html', {"name": name})
+
 
 #Pause de développement pour finir d'abord avec le choix de cours pour les étudiants.
 #######################################################################################################################
@@ -597,6 +595,7 @@ def detail_paiement(request, etud):
 
     else:
         return HttpResponse("<h3>Vous navez pas droit à cette vue </h3>")
+
 
 """
     Pour l'etudiant:
@@ -660,8 +659,10 @@ def choix_cours(request):
                     current_month = current_month.month
                     professeur = matiere.charge_crs.user.email
                     professeur = Profile.objects.get(user__email=professeur)
-                    Note.objects.create(professeur=professeur, etudiant=etudiant_principal, module=matiere)     #Cette ligne permet de créer une note automatique pour letudiant
-                    Payer.objects.create(modules=matiere, profile=etudiant_principal, montant=montant_prix, session="session automne")
+                    Note.objects.create(professeur=professeur, etudiant=etudiant_principal,
+                                        module=matiere)  #Cette ligne permet de créer une note automatique pour letudiant
+                    Payer.objects.create(modules=matiere, profile=etudiant_principal, montant=montant_prix,
+                                         session="session automne")
 
                 Choix_Cours.objects.create(user=etudiant_principal, cours=val1, groupe=1)
 
@@ -687,33 +688,94 @@ def creation_group(request):
 
     print(mon_module.charge_crs)
     #print(choix)
+    #Jai juste à le mettre dans un try except
     create_concerne = Create_groupe.objects.filter(professeur=user2).filter(matiere=mon_module)
     print(len(create_concerne))
     les_concerne = Choix_Cours.objects.filter(cours__contains=matiere).values("user__user__email")
 
     #print(les_concerne)
-    mes_etudiants = [value for item in les_concerne for key, value in item.items() ]
+    mes_etudiants = [value for item in les_concerne for key, value in item.items()]
     print(mes_etudiants)
 
     if choix == "etudiant":
-        pass
+        le_cours = "Element de Programmation"
+        print(request.user.email)
+        mes_cours = Choix_Cours.objects.filter(user__user__email=request.user.email)
+        ma_matiere = module.objects.get(name="Element de Programmation")
+        my_all_group = Create_groupe.objects.all().values("matiere__name")
+        my_all_group = [value for item in my_all_group for key, value in item.items()]
+
+        if le_cours in my_all_group:    #Là je vois juste que si le cours possède des demandes de groupe
+            print("hello world!")
+            groupe_concerne = Create_groupe.objects.get(matiere=ma_matiere)
+            #print(groupe_concerne.concerne)
+            groupe_concerne.concerne = eval(groupe_concerne.concerne)
+
+            verif_display = gere_note_groupe(groupe_concerne.concerne)._rechercher_etudiant(request.user.email)
+
+            if verif_display != -1:
+                print(verif_display)
+                if request.method == "POST" and request.headers.get('x-requested-with') == "XMLHttpRequest":
+                    data = request.POST
+                    print(len(data))
+
+                return render(request, 'cours/vue_etudiant/affiche_only_group_etud.html', context=dict(keys=verif_display, all=groupe_concerne.concerne))
+            else:
+
+                if request.method == "POST" and request.headers.get('x-requested-with') == "XMLHttpRequest":
+                    data = request.POST
+                    print(len(data))
+                    print(request.user.email)
+
+                    if len(data) == 2:
+                        for key in data:
+                            if key != "csrfmiddlewaretoken":
+                                pass
+
+                    else:
+                        return JsonResponse({"valeur": "Vous ne pouvez faire partir que d'un seul groupe!"})
+                else:
+                    return render(request, 'cours/vue_etudiant/affiche_only_group_etud.html',
+                                  context={'all': groupe_concerne.concerne})
+
+                return render(request, 'cours/vue_etudiant/affiche_only_group_etud.html', context=dict(all=groupe_concerne.concerne))
+
+        #return render(request, 'cours/vue_etudiant/affiche_only_group_etud.html')
 
     elif choix == "charge_cours":
         if len(create_concerne) > 0:
-            #bien retoucher
-            return HttpResponse("Ce cours possède dejà des groupes")
+            ma_liste = eval(create_concerne[0].concerne)
+            for item in ma_liste:
+                print(item)
+            return render(request, 'cours/prof/affiche_only_group_prof.html', context={"mes_elements": ma_liste})
 
         else:
             if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
-                cours_list = ""
-                nb = request.POST.get("nb")  # nbre de personne
-                nb_groupe = request.POST.get("nb_chap")  # nbre de groupe
+                nb = request.POST.get("nb", "")  # nbre de personne
+                nb_groupe = request.POST.get("nb_chap", "")  # nbre de groupe
+                try:
+                    nb = int(nb)
+                    nb_groupe = int(nb_groupe)
+                except ValueError:
+                    message_error = "Entrez le bon type svp"
+                    return JsonResponse({"error": message_error})
 
-                # print(etudiant)
-                # all_etudiant = Choix_Cours.objects.get(cours=module).values("user__user__email")
-                # print(all_etudiant)
-                if nb_groupe != "" and isinstance(eval(nb_groupe), int):
-                    return JsonResponse({"saidou": nb})
+                if nb_groupe > int(len(user)) / 2:
+                    return JsonResponse({"attention": "Verifié bien le nombre de personne par groupe"})
+
+                elif nb_groupe * nb > len(user):
+                    return JsonResponse({"error_nbre": "Le nombre de tout les etudiants par groupe doit pas depasser le nmbre total"})
+                else:
+                    concerne = []
+                    etudiant = ["" for _ in range(nb+1)]
+                    for i in range(nb_groupe):
+                        concerne.append({i: {"ETUDIANT": etudiant, "Note": [], "file": []}})
+
+                    concerne = str(concerne)
+                    Create_groupe.objects.create(professeur=user2, matiere=mon_module, concerne=concerne)
+                    mon_url = reverse("cours:create_group")
+                    return JsonResponse({"contenu": "Informations bien reçu!", "mon_url": mon_url})
+
             return render(request, 'cours/prof/group_create.html', context={"mes_user": user, "longueur": len(user)})
 
 

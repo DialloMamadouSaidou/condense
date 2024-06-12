@@ -1,7 +1,9 @@
 {% extends 'base_user.html' %}
 
-{% block css %}
+{% load static %}
 
+{% block css %}
+        <link rel="stylesheet" href="{% static 'cours/css/style_prof/style_create_groupe.css' %}">
 {% endblock %}
 {% block content %}
 
@@ -18,6 +20,10 @@
 
 <p id="nbre"></p>
 <p id="titre"></p>
+<div id="etudiant">
+    <p>1-Mamadou</p>
+    <p>2-Diallo</p>
+</div>
 
 <form method="POST" id="mon_formulaire">
         {% csrf_token %}
@@ -45,12 +51,21 @@ $(document).ready(function(){
     },
     success: function(response){
         console.log(response.saidou);
-        let mon_nombre = $("#name").val();
+
+        $("#mes_users").empty();
+        $("#nbre").html(response.error);
+
+        $("#nbre").html(response.attention);
+        $("#nbre").html(response.error_nbre);
         $("#mes_users").empty();
         $("#name").val("");
         $("#nb_chap").val("");
 
-        $("#nbre").html(response.saidou);
+        if(response.contenu){
+            $("#nbre").html(response.contenu);
+            window.location.href = response.mon_url;
+        }
+
     }
 
     })
