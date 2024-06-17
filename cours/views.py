@@ -680,79 +680,94 @@ def creation_group(request):
     user = Profile.objects.all()
 
     user2 = Profile.objects.get(user__email=request.user.email)
-    choix = user2.choices
 
-    matiere = "Element de Programmation"
+    matiere = "Element de Programmation" #Elle sera à supprimé par après
 
-    mon_module = module.objects.get(name="Element de Programmation")
+    mon_module = module.objects.get(name="Element de Programmation")    #Je recupère ma vrai matière
 
-    print(mon_module.charge_crs)
-    #print(choix)
+
     #Jai juste à le mettre dans un try except
     create_concerne = Create_groupe.objects.filter(professeur=user2).filter(matiere=mon_module)
-    print(len(create_concerne))
-    les_concerne = Choix_Cours.objects.filter(cours__contains=matiere).values("user__user__email")
+
+    les_concerne = Choix_Cours.objects.filter(cours__contains=matiere).values("user__user__email") #Là je vois que si mon etudiant à dejà faire ce choix de cours!
 
     #print(les_concerne)
     mes_etudiants = [value for item in les_concerne for key, value in item.items()]
-    print(mes_etudiants)
 
-    if choix == "etudiant":
+    if user2.choices == "etudiant":
         le_cours = "Element de Programmation"
-        print(request.user.email)
-        mes_cours = Choix_Cours.objects.filter(user__user__email=request.user.email)
-        ma_matiere = module.objects.get(name="Element de Programmation")
+
+        mes_cours = Choix_Cours.objects.filter(user__user__email=request.user.email)    #Là je recupère les choix de cours de mon utilisateur
+        #ma_matiere = module.objects.get(name="Element de Programmation")
         my_all_group = Create_groupe.objects.all().values("matiere__name")
-        my_all_group = [value for item in my_all_group for key, value in item.items()]
+        my_all_group = [value for item in my_all_group for key, value in item.items()] #là je recupère toute les matières qui demandes des creations de groupe
 
         if le_cours in my_all_group:    #Là je vois juste que si le cours possède des demandes de groupe
-            print("hello world!")
-            groupe_concerne = Create_groupe.objects.get(matiere=ma_matiere)
+
+            groupe_concerne = Create_groupe.objects.get(matiere=mon_module)
             #print(groupe_concerne.concerne)
             groupe_concerne.concerne = eval(groupe_concerne.concerne)
 
-            verif_display = gere_note_groupe(groupe_concerne.concerne)._rechercher_etudiant(request.user.email)
+            verif_display = gere_note_groupe(groupe_concerne.concerne).rechercher_etudiant(request.user.email)
 
-            if verif_display != -1:
+            if verif_display != -1:  #verif_display = -1 veut juste dire que  letudiant n'a pas de groupe pour le moment
+               print(verif_display)
+               gestions = gere_note_groupe(groupe_concerne.concerne)
+               mes_limites = gestions.place_limite_and_available()
+               print(mes_limites)
+               return render(request, "cours/vue_etudiant/affiche_only_group_etud.html", context={"all": groupe_concerne.concerne, 'code': verif_display, "limite": mes_limites})
+
+            else:   #Le else qui est là cest quand l'etudiant na pas de groupe d'abord
                 print(verif_display)
-                if request.method == "POST" and request.headers.get('x-requested-with') == "XMLHttpRequest":
+                gestions = gere_note_groupe(groupe_concerne.concerne)
+                if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
                     data = request.POST
-                    print(len(data))
-
-                return render(request, 'cours/vue_etudiant/affiche_only_group_etud.html', context=dict(keys=verif_display, all=groupe_concerne.concerne))
-            else:
-
-                if request.method == "POST" and request.headers.get('x-requested-with') == "XMLHttpRequest":
-                    data = request.POST
-                    print(len(data))
-                    print(request.user.email)
 
                     if len(data) == 2:
                         for key in data:
-                            if key != "csrfmiddlewaretoken":
-                                pass
+                            if key != 'csrfmiddlewaretoken':
+                                gestions.ajout_etudiant(int(key), request.user.email)
 
+                        groupe_concerne.save()
+                        mon_url = reverse('cours:create_group')
+                        return JsonResponse({"mon_url": mon_url})
                     else:
-                        return JsonResponse({"valeur": "Vous ne pouvez faire partir que d'un seul groupe!"})
-                else:
-                    return render(request, 'cours/vue_etudiant/affiche_only_group_etud.html',
-                                  context={'all': groupe_concerne.concerne})
+                        return JsonResponse({"valeur": "Vous ne pouvez faire partir que dun seul groupe à la fois!"})
+                limite = gestions.place_limite_and_available()
+                return render(request, "cours/vue_etudiant/affiche_only_group_etud.html", context={"all": groupe_concerne.concerne, "code": verif_display, "limite": limite})
 
-                return render(request, 'cours/vue_etudiant/affiche_only_group_etud.html', context=dict(all=groupe_concerne.concerne))
-
+        else:   #En cas si le cours n'as pas une requête de création de groupe dabord
+            return HttpResponse("Ce groupe na pas de choix dami à faire dabord!")
         #return render(request, 'cours/vue_etudiant/affiche_only_group_etud.html')
 
-    elif choix == "charge_cours":
+    elif user2.choices == "charge_cours":
         if len(create_concerne) > 0:
             ma_liste = eval(create_concerne[0].concerne)
             for item in ma_liste:
                 print(item)
             return render(request, 'cours/prof/affiche_only_group_prof.html', context={"mes_elements": ma_liste})
 
-        else:
+        else:   #Cest ici que je fais la création de mon groupe
+            mes_planifier = Planification.objects.get(matiere=mon_module)
+
+            recap = []
+            for key, value in eval(mes_planifier.ponderation).items():
+                for k, v in value.items():
+                    recap.append(f"{k}~{v}")
+
             if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
-                nb = request.POST.get("nb", "")  # nbre de personne
-                nb_groupe = request.POST.get("nb_chap", "")  # nbre de groupe
+                nb = ""     # nbre de personne
+                nb_groupe = ""      # nbre de groupe
+                data = request.POST
+                short_list = ["csrfmiddlewaretoken", "name", "nb_chap"]
+                liste_exam = []
+                for key, value in data.items():
+                    if key not in short_list:
+                        liste_exam.append(key)
+
+                nb = data.get("name", "")
+                nb_groupe = data.get("nb_chap", "")
+                print(len(liste_exam))
                 try:
                     nb = int(nb)
                     nb_groupe = int(nb_groupe)
@@ -765,19 +780,40 @@ def creation_group(request):
 
                 elif nb_groupe * nb > len(user):
                     return JsonResponse({"error_nbre": "Le nombre de tout les etudiants par groupe doit pas depasser le nmbre total"})
+
                 else:
-                    concerne = []
-                    etudiant = ["" for _ in range(nb+1)]
-                    for i in range(nb_groupe):
-                        concerne.append({i: {"ETUDIANT": etudiant, "Note": [], "file": []}})
 
-                    concerne = str(concerne)
-                    Create_groupe.objects.create(professeur=user2, matiere=mon_module, concerne=concerne)
-                    mon_url = reverse("cours:create_group")
-                    return JsonResponse({"contenu": "Informations bien reçu!", "mon_url": mon_url})
+                    if len(liste_exam) > 0:
+                        concerne = []
+                        etudiant = ["" for _ in range(nb+1)]
+                        for i in range(nb_groupe):
+                            concerne.append({i: {"ETUDIANT": etudiant, "Note": [{item: ""} for item in liste_exam], "file": [], "limit": int(nb)}})
 
-            return render(request, 'cours/prof/group_create.html', context={"mes_user": user, "longueur": len(user)})
+                        try:
+
+                            Create_groupe.objects.create(professeur=user2, matiere=mon_module, concerne=str(concerne))
+                            mon_url = reverse("cours:create_group")
+                            return JsonResponse({"contenu": "Informations bien reçu!", "mon_url": mon_url})
+
+                        except Planification.DoesNotExist:
+                            return HttpResponse("Votre matière n'est pas modifié dabord!")
+
+                    else:
+                        return JsonResponse({"exam": "Vous devez choisir votre examen svp et cest obligé!"})
+
+            return render(request, 'cours/prof/group_create.html', context={"mes_user": user, "longueur": len(user), "recap": recap})
+
+    else:
+        return HttpResponse("CE COURS NA PAS DE GROUPE POUR LE MOMENT!")
 
 
-def notation_groupe(request):
+def ajout_note_groupe(request):
+    pass
+
+
+def ajout_etudiant(request):
+    pass
+
+
+def ajout_file_groupe(request):
     pass

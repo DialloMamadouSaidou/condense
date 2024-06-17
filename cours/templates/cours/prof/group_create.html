@@ -17,6 +17,7 @@
     {% endfor %}
 </div>
 
+<p id="exam"></p>
 
 <p id="nbre"></p>
 <p id="titre"></p>
@@ -29,8 +30,17 @@
         {% csrf_token %}
         <input type="text" placeholder="Entrez Le nombre delement" name="name" id="name">
         <input type="text" placeholder="Le nombre de groupe" name="nb_chap" id="nb_chap" min="2">
+        <hr>
+        {% for valeur in recap %}
+            <div>
+                <label>{{ valeur }}</label>
+                <input type="checkbox" value="{{ valeur }}" name="{{ valeur }}">
+            </div>
+        {% endfor %}
         <input type="submit" value="soumettre">
 </form>
+
+
 
 <script type="text/javascript">
     console.log("hello world");
@@ -38,17 +48,13 @@
 $(document).ready(function(){
     $("#mon_formulaire").on("submit", function(e){
         e.preventDefault();
-
+        var form_data = $(this).serialize();
     $.ajax({
 
     type: "POST",
     url: "{% url 'cours:create_group' %}",
 
-    data: {
-        nb: $("#name").val(),
-        nb_chap: $("#nb_chap").val(),
-        csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val()
-    },
+    data: form_data,
     success: function(response){
         console.log(response.saidou);
 
@@ -64,7 +70,8 @@ $(document).ready(function(){
         if(response.contenu){
             $("#nbre").html(response.contenu);
             window.location.href = response.mon_url;
-        }
+        };
+        $("#exam").html(response.exam);
 
     }
 

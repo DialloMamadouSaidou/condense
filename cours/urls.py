@@ -29,5 +29,5 @@ urlpatterns = [
     #path('generate-pdf/<str:name>', generate_pdf_view, name='generate_pdf'),
     path('serve-pdf/<str:name>', serve_pdf, name='serve_pdf'),
 
-    path('create', creation_group, name='create_group')
+    path('create', creation_group, name='create_group'),
 ]

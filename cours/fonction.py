@@ -265,6 +265,13 @@ def create_pdf(name_pdf, data):
     return path
 
 
+def reorganise_liste(liste):
+    non_vides = [element for element in liste if element]
+    vide = [element for element in liste if not element]
+
+    return non_vides + vide
+
+
 class gere_note_groupe:
     def __init__(self, name):
         self.name = name
@@ -292,14 +299,22 @@ class gere_note_groupe:
 
     def ajout_etudiant(self, groupe: int, etudiant):
         reponse = self.recherche_element(groupe)
-        if reponse != -1:
-            if self._rechercher_etudiant(etudiant) == -1:
-                element = self.name[reponse]
-                for value in element.values():
-                    value["ETUDIANT"].append(etudiant)
+        dico = self.place_limite_and_available()
 
+        if reponse != -1:
+            if self.rechercher_etudiant(etudiant) == -1:
+                if dico[groupe] != 0:
+                    element = self.name[reponse]
+                    for value in element.values():
+                        for item, valeur in enumerate(value["ETUDIANT"]):
+                            if valeur == "":
+                                value["ETUDIANT"][item] = etudiant
+                                break
+
+                else:
+                    print("Le groupe à déjà atteint son nombre maximal")
             else:
-                print(f"Cet etudiant existe déjà dans le groupe {self._rechercher_etudiant(etudiant)}")
+                print(f"Cet etudiant existe déjà dans le groupe {self.rechercher_etudiant(etudiant)} ou le groupe est déjà rempli")
         else:
             print("Le groupe nexiste pas!")
 
@@ -307,8 +322,15 @@ class gere_note_groupe:
         reponse = self.recherche_element(groupe)
         if reponse != -1:
             element = self.name[reponse]
+            rep = self.rechercher_etudiant(etudiant)
+
             for value in element.values():
-                value["ETUDIANT"].remove(etudiant)
+                for item in value["ETUDIANT"]:
+                    mon_index = value["ETUDIANT"].index(etudiant)
+                    value["ETUDIANT"][mon_index] = ""
+                    value["ETUDIANT"] = reorganise_liste(value["ETUDIANT"])
+                    break
+
         else:
             pass
 
@@ -318,7 +340,7 @@ class gere_note_groupe:
     def ajout_fichier(self, groupe, file):
         pass
 
-    def _rechercher_etudiant(self, etudiant):
+    def rechercher_etudiant(self, etudiant):
 
         if etudiant in [i for item in self.name for key, value in item.items() for i in value["ETUDIANT"]]:
             for item in self.name:
@@ -332,22 +354,33 @@ class gere_note_groupe:
     #la place disponible que je dois calculé
     def place_limite_and_available(self):
         ma_reference = {}
-        for item in mon_dico:
+        for item in self.name:
             for key, value in item.items():
-                ma_reference[key] = value["limit"] - len(value["ETUDIANT"])
+                nombre_empty = sum(1 for char in value["ETUDIANT"] if char != "")
+                ma_reference[key] = value["limit"] - nombre_empty
 
-        print(ma_reference)
+        return ma_reference
+
+
 
 if __name__ == "__main__":
-    mon_dico = [{1: {"ETUDIANT": ["Mamadou", "Saidou"], "Note": "", "limit":   4}}, {2: {"ETUDIANT": ["Diallo"], "Note": "5", "limit": 4}}]
+    mon_dico = [{1: {"ETUDIANT": ["", "", "", ""], "Note": "", "limit":   4}}, {2: {"ETUDIANT": ["", "", "", ""], "Note": "5", "limit": 4}}]
     essaie_note = gere_note_groupe(mon_dico)
     essaie_note.ajout_note(2, 5)
-    essaie_note.ajout_etudiant(1, "Diallo")
-    essaie_note.ajout_etudiant(2, "Mamadou")
-    essaie_note.ajout_etudiant(2, "Saidou")
-    #essaie_note.supprimer_etudiant(2, "Saidou")
+    essaie_note.ajout_etudiant(1, "KOTO")
+    essaie_note.ajout_etudiant(1, "mignan an")
+    essaie_note.ajout_etudiant(1, "saidou")
+
+    #essaie_note.supprimer_etudiant(1, "KOTO")
+
+    saidou = essaie_note.place_limite_and_available()
+    print(saidou)
     print(mon_dico)
-    essaie_note.place_limite_and_available()
+
+
+    #print(mon_dico)
+    #print("--"*50)
+    #print(essaie_note.place_limite_and_available())
     #element = essaie_note.rechercher_etudiant("Saidou")
     #print(element)
     #print(mon_dico)

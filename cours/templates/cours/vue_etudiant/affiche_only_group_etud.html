@@ -22,15 +22,17 @@
             <div class="groupe">
 
                 <p class="cle">{{ key }}</p>
-
-                {% if key == keys %}
-                   <input type="radio" name="{{ key }}" id="{{ key }}" class="choice" value="{{ key }}" disabled>
-                {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-patch-check-fill bg-danger" viewBox="0 0 16 16" id="im{{ key }}">
+  <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
+</svg>
                   <input type="radio" name="{{ key }}" id="{{ key }}" class="choice" value="{{ key }}">
-                {% endif %}
-                <p>Place disponible: </p>
-                <p>Etudiant inscrit: </p>
 
+                <p>Etudiant total: </p>
+            {% for k, v in limite.items %}
+                {% if k == key %}
+                <p>Place disponible: {{ v }}</p>
+                {% endif %}
+            {% endfor %}
                 {% for item in value.etudiant %}
                     <p class="{{ key }}etud">{{ item }}</p>
                 {% endfor %}
@@ -43,19 +45,124 @@
 </div>
     <input type="submit" value="soumettre">
 </form>
+
+<p id="code">{{ code }}</p>
 <button id="modifie">Modifier</button>
 
 <div id="icon-erreur">
-<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-exclamation-octagon-fill" viewBox="0 0 16 16">
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="90" fill="currentColor" class="bi bi-exclamation-octagon-fill" viewBox="0 0 16 16">
   <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
 </svg>
+</div>
+
+<div id="confirmation">
+
 </div>
 
 <script type="text/javascript">
         // Passez l'URL à une variable JavaScript
         var createGroupUrl = "{% url 'cours:create_group' %}";
+
  </script>
 
-<script type="text/javascript" src="{% static 'cours/jss/etudiant/etudiant_choice_group.js' %}">
+<script type="text/javascript">
+
+    console.log("hello world!");
+    var item;
+    let mes_choix = document.querySelectorAll(".choice");
+
+
+
+mes_choix.forEach(function(item){
+var index = 1;
+item.addEventListener("click", function(){
+
+if(index === 1){
+            this.checked = true;
+            index = 0;
+}else {
+            this.checked = false;
+            index = 1;
+};
+        });
+    });
+
+$("#icon-erreur").hide();
+
+$("#modifie").click(function(){
+    mes_choix.forEach(function(item){
+        item.disabled = false;
+    })
+});
+
+
+var mon_code = document.getElementById("code"); //Je recupère le code qui sera le noyau central de mes manipulations
+let mes_cle = document.querySelectorAll(".cle"); //Je recupère toute mes clés genre le nom de mes groupes
+$("#code").hide();
+
+if(mon_code.innerHTML !== '-1'){    //mon_code.innerHTML renvoie le statut de ma page genre si jai -1 letudiant à déjà
+//fait son choix sinn il ne l'a pas fait
+
+mes_cle.forEach(function(item){
+    var bon_index = item.innerHTML;
+    $("#im"+bon_index).hide();
+    if(bon_index === mon_code.innerHTML){
+        $("#im"+bon_index).show();
+    }
+});
+
+   mes_choix.forEach(function(item){
+        item.disabled = true;
+   });
+   console.log("bon code");
+   $("#modifie").show();
+}
+else{
+
+mes_cle.forEach(function(item){
+    var bon_index = item.innerHTML;
+    $("#im"+bon_index).hide();
+    if(bon_index === mon_code.innerHTML){
+        $("#im"+bon_index).hide();
+    }
+});
+$("#modifie").hide();
+
+};
+
+$("#post-choix").on("submit", function(e){
+    e.preventDefault();
+    var form_data = $(this).serialize();
+
+
+$.ajax({
+        type: "POST",
+        url: createGroupUrl,
+
+        data: form_data,
+        success: function(response){
+            console.log("help me to debug my code!");
+
+
+            if(response.valeur){
+                $("#icon-erreur").show();
+            }
+
+            else{
+                $("#icon-erreur").hide();
+
+            };
+
+
+            if(response.mon_url){
+                window.location.href = response.mon_url;
+            }
+
+        }
+})
+
+
+})
+
 </script>
 {% endblock %}

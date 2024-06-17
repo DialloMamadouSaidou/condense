@@ -275,7 +275,8 @@ class Create_groupe(models.Model):
     professeur = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
     matiere = models.ForeignKey(module, on_delete=models.SET_NULL, null=True)
     concerne = models.TextField(blank=True)
-    note = models.CharField(max_length=4, blank=True)
+    note = models.CharField(max_length=10, blank=True)
+    examen_concerne = models.CharField(max_length=20, blank=True)
     #document_file = models.FileField(blank=True)
 
     def save(self, *args, **kwargs):

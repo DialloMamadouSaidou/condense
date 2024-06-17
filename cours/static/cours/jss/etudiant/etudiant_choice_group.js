@@ -20,7 +20,7 @@ if(index === 1){
             this.checked = false;
             index = 1;
 };
-        })
+        });
     });
 
 $("#icon-erreur").hide();
@@ -40,13 +40,19 @@ $.ajax({
 
         data: form_data,
         success: function(response){
-            console.log(response.valeur);
+            console.log("help me to debug my code!");
+
+
             if(response.valeur){
                 $("#icon-erreur").show();
             }
+
             else{
                 $("#icon-erreur").hide();
-            }
+
+            };
+
+            console.log(response.valeur);
 
         }
 })

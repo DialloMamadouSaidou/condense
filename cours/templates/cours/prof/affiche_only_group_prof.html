@@ -23,8 +23,38 @@
                     <div class="conteneur">
                         <ul class="list-group">
                             <li class="list-group-item active">Étudiants</li>
-                            {% for etudiant in details.etudiant %}
-                                <li class="list-group-item">{{ etudiant }}</li>
+                            {% for etudiant in details.ETUDIANT %}
+
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-around">
+
+                                    <div id="{{ etudiant }}" class="etudiant">{{ etudiant }}</div>
+
+                                    {% if etudiant %}
+                                        <div>
+                                            <button id="remove{{ etudiant }}" class="rm">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-x-fill" viewBox="0 0 16 16">
+                                                    <path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m6.146-2.854a.5.5 0 0 1 .708 0L14 6.293l1.146-1.147a.5.5 0 0 1 .708.708L14.707 7l1.147 1.146a.5.5 0 0 1-.708.708L14 7.707l-1.146 1.147a.5.5 0 0 1-.708-.708L13.293 7l-1.147-1.146a.5.5 0 0 1 0-.708"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div><input type="text" placeholder="Entrez letudiant" data-index="" class="entre"></div>
+                                        <div >
+                                        <button class="add" data-index="">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus-fill" viewBox="0 0 16 16">
+                                                    <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                                                    <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/>
+                                                </svg>
+                                        </button>
+                                        </div>
+                                    {% endif %}
+
+
+                                </div>
+
+                            </li>
+
                             {% empty %}
                                 <li class="list-group-item">Aucun étudiant</li>
                             {% endfor %}
@@ -34,8 +64,21 @@
                     <!-- Notes -->
                     <div class="note">
                         <p class="list-group-item active">Notes</p>
+
+
                         {% for note in details.Note %}
-                            <p>{{ note }}</p>
+
+                            {% for key, value in note.items %}
+                               <div class="content d-flex justify-content-between">
+                                <div>{{ key }}</div>
+                                {% if value == "" %}
+                                    <div>Pas de note</div>
+                                {% else %}
+                                    <div class="note bg-info border border-primary border-2">{{ value }}</div>
+                                {% endif %}
+
+                                </div>
+                            {% endfor %}
                         {% empty %}
                             <p>Aucune note</p>
                         {% endfor %}
@@ -57,5 +100,34 @@
         {% endfor %}
     {% endfor %}
 </div>
+
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+    //$("#addsaidessai466@gmail.com").hide();
+    var button = document.getElementById("addsaidessai466@gmail.com");
+    console.log(button);
+    $(button).hide();
+    $(".rm").click(function(){
+        console.log(this.id);
+    });
+
+var my_students = document.querySelectorAll('.add');
+var mes_entre = document.querySelectorAll(".entre");
+var j=i=0;
+
+mes_entre.forEach(function(item){
+    console.log(j);
+    j++;
+});
+
+my_students.forEach(function(item){
+    $(item).attr('data-index', i);
+    i++;
+});
+});
+</script>
 
 {% endblock %}
