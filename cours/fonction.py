@@ -272,6 +272,13 @@ def reorganise_liste(liste):
     return non_vides + vide
 
 
+class Etudiant_Exist(Exception):
+
+    def __init__(self, message="Letudiant est déjà dans un groupe"):
+        self.message = message
+        super().__init__(self.message)
+
+
 class gere_note_groupe:
     def __init__(self, name):
         self.name = name
@@ -279,7 +286,7 @@ class gere_note_groupe:
     def __str__(self):
         return self.name
 
-    def recherche_element(self, element) -> int:    #Cette fonction verifie si un groupe existe ou pas
+    def recherche_element(self, element) -> int:  #Cette fonction verifie si un groupe existe ou pas
 
         liste_groupe = [key for item in self.name for key in item]
         if element in liste_groupe:
@@ -295,7 +302,7 @@ class gere_note_groupe:
             for value in element.values():
                 value["Note"] = str(note)
         else:
-                raise ValueError("Ce numéro de groupe nexiste pas!")
+            raise ValueError("Ce numéro de groupe nexiste pas!")
 
     def ajout_etudiant(self, groupe: int, etudiant):
         reponse = self.recherche_element(groupe)
@@ -312,9 +319,9 @@ class gere_note_groupe:
                                 break
 
                 else:
-                    print("Le groupe à déjà atteint son nombre maximal")
+                    raise Etudiant_Exist("Letudiant existe déjà")
             else:
-                print(f"Cet etudiant existe déjà dans le groupe {self.rechercher_etudiant(etudiant)} ou le groupe est déjà rempli")
+                raise Etudiant_Exist(f"letudiant existe déjà au groupe {self.rechercher_etudiant(etudiant)}")
         else:
             print("Le groupe nexiste pas!")
 
@@ -361,20 +368,44 @@ class gere_note_groupe:
 
         return ma_reference
 
+    def rajout_longueur_etudiant(self, groupe, ma_nouvelle_liste):
+        search_group = self.recherche_element(groupe)
+
+        if search_group != -1:
+            index = 0
+            etudiant, rep = "", ""
+            for item in ma_nouvelle_liste:
+                if item != "":
+                    rep = self.rechercher_etudiant(item)
+                    if rep != -1:
+                        index = 1
+                        etudiant = item
+                        break
+
+            if index == 1:
+                raise Etudiant_Exist(f"Letudiant {etudiant} existe déjà au groupe {rep}")
+            else:
+
+                mon_concerne = self.name[search_group]
+                for key, value in mon_concerne.items():
+                    value["ETUDIANT"].extend(ma_nouvelle_liste)
+                    value["ETUDIANT"] = reorganise_liste(value["ETUDIANT"])
+
+        else:
+            print("Ce groupe nexiste pas")
 
 
 if __name__ == "__main__":
-    mon_dico = [{1: {"ETUDIANT": ["", "", "", ""], "Note": "", "limit":   4}}, {2: {"ETUDIANT": ["", "", "", ""], "Note": "5", "limit": 4}}]
+    mon_dico = [{1: {"ETUDIANT": ["", "", "", ""], "Note": "", "limit": 4}},
+                {2: {"ETUDIANT": ["", "mamadou", "", ""], "Note": "5", "limit": 4}}]
     essaie_note = gere_note_groupe(mon_dico)
     essaie_note.ajout_note(2, 5)
-    essaie_note.ajout_etudiant(1, "KOTO")
-    essaie_note.ajout_etudiant(1, "mignan an")
-    essaie_note.ajout_etudiant(1, "saidou")
+    #essaie_note.ajout_etudiant(1, "KOTO")
+    #essaie_note.ajout_etudiant(1, "mignan an")
+    #essaie_note.ajout_etudiant(1, "saidou")
 
-    #essaie_note.supprimer_etudiant(1, "KOTO")
-
-    saidou = essaie_note.place_limite_and_available()
-    print(saidou)
+    #print(essaie_note.rechercher_etudiant("KOTO"))
+    essaie_note.rajout_longueur_etudiant(1, ["mamadou", ""])
     print(mon_dico)
 
 
@@ -386,7 +417,7 @@ if __name__ == "__main__":
     #print(mon_dico)
     #indexi = essaie_note.recherche_element(2)
     #for value in mon_dico[indexi].values():
-     #   value["Note"] = "45"
+    #   value["Note"] = "45"
 
     #print(mon_dico)
     """

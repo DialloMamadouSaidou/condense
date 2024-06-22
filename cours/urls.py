@@ -30,4 +30,6 @@ urlpatterns = [
     path('serve-pdf/<str:name>', serve_pdf, name='serve_pdf'),
 
     path('create', creation_group, name='create_group'),
+    path('ajout_grp', ajout_etudiant, name="add_student_in_grp"),
+    path('ajout_work/<str:matiere>', ajout_work_groupe, name="add_work")
 ]

@@ -277,6 +277,9 @@ class Create_groupe(models.Model):
     concerne = models.TextField(blank=True)
     note = models.CharField(max_length=10, blank=True)
     examen_concerne = models.CharField(max_length=20, blank=True)
+    liste_date = models.CharField(max_length=200, blank=True)
+    politique = models.CharField(max_length=300, blank=True)
+    file_prof = models.CharField(max_length=200, blank=True)
     #document_file = models.FileField(blank=True)
 
     def save(self, *args, **kwargs):

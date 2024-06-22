@@ -43,7 +43,7 @@
         {% endfor %}
     {% endfor %}
 </div>
-    <input type="submit" value="soumettre">
+    <input type="submit" value="soumettre" id="submit">
 </form>
 
 <p id="code">{{ code }}</p>
@@ -99,6 +99,7 @@ $("#modifie").click(function(){
 var mon_code = document.getElementById("code"); //Je recupère le code qui sera le noyau central de mes manipulations
 let mes_cle = document.querySelectorAll(".cle"); //Je recupère toute mes clés genre le nom de mes groupes
 $("#code").hide();
+console.log(mon_code.innerHTML);
 
 if(mon_code.innerHTML !== '-1'){    //mon_code.innerHTML renvoie le statut de ma page genre si jai -1 letudiant à déjà
 //fait son choix sinn il ne l'a pas fait
@@ -116,6 +117,7 @@ mes_cle.forEach(function(item){
    });
    console.log("bon code");
    $("#modifie").show();
+   $("#submit").hide();
 }
 else{
 
@@ -127,6 +129,7 @@ mes_cle.forEach(function(item){
     }
 });
 $("#modifie").hide();
+$("#submit").show();
 
 };
 

@@ -681,7 +681,7 @@ def creation_group(request):
 
     user2 = Profile.objects.get(user__email=request.user.email)
 
-    matiere = "Element de Programmation" #Elle sera à supprimé par après
+    matiere = "Element de Programmation"    #Elle sera à supprimé par après
 
     mon_module = module.objects.get(name="Element de Programmation")    #Je recupère ma vrai matière
 
@@ -689,10 +689,10 @@ def creation_group(request):
     #Jai juste à le mettre dans un try except
     create_concerne = Create_groupe.objects.filter(professeur=user2).filter(matiere=mon_module)
 
-    les_concerne = Choix_Cours.objects.filter(cours__contains=matiere).values("user__user__email") #Là je vois que si mon etudiant à dejà faire ce choix de cours!
+    #les_concerne = Choix_Cours.objects.filter(cours__contains=matiere).values("user__user__email") #Là je vois que si mon etudiant à dejà faire ce choix de cours!
 
     #print(les_concerne)
-    mes_etudiants = [value for item in les_concerne for key, value in item.items()]
+    #mes_etudiants = [value for item in les_concerne for key, value in item.items()]
 
     if user2.choices == "etudiant":
         le_cours = "Element de Programmation"
@@ -742,10 +742,59 @@ def creation_group(request):
 
     elif user2.choices == "charge_cours":
         if len(create_concerne) > 0:
-            ma_liste = eval(create_concerne[0].concerne)
-            for item in ma_liste:
-                print(item)
-            return render(request, 'cours/prof/affiche_only_group_prof.html', context={"mes_elements": ma_liste})
+            create_concerne[0].concerne = eval(create_concerne[0].concerne)
+
+            if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+                data = dict(request.POST)
+                help_get_data = defaultdict(list)               #Ce dico va juste me permettre de de recupéré mes élments à ajouter dans ma liste
+                help_extend_get_data = defaultdict(list)        #Ce dico sera pour moi le dico qui va me permettre de recupéré mes éléments à étendre
+                repere = 0
+                temporary_help = gere_note_groupe(create_concerne[0].concerne)
+                for key, value in data.items():
+                    if key != 'csrfmiddlewaretoken':
+
+                        if not key.startswith("r") and key.startswith("n"):
+                            name, index = key.split('~')
+                            for valeur in value:
+                                if valeur != "":
+                                    help_get_data[index].append(valeur)
+
+                        else:
+                            name, index = key.split('~')
+
+                            for valeur in value:
+                                help_extend_get_data[index].append(valeur)
+
+                help_get_data = dict(help_get_data)
+                help_extend_get_data = dict(help_extend_get_data)
+
+                try:
+                    if len(help_get_data) > 0:
+                        for key, value in help_get_data.items():
+
+                            for index in value:
+                                temporary_help.ajout_etudiant(int(key), index)
+
+                    if len(help_extend_get_data) > 0:
+                        for key, value in help_extend_get_data.items():
+                            temporary_help.rajout_longueur_etudiant(int(key), list(value))
+
+                except Etudiant_Exist as e:
+                    erreur = str(e)
+                    erreur = erreur.split(' ')[-1]
+                    print(e)
+                    return JsonResponse({"erreur": "Message derreur", "errno": erreur})
+                    repere = 1
+
+                if repere == 0:
+                    create_concerne[0].concerne = create_concerne[0].concerne
+                    create_concerne[0].save()
+                    mon_url = reverse("cours:create_group")
+                    return JsonResponse({"Confirmation": "Votre étudiant à bien été enregistré", "mon_url": mon_url})
+
+
+
+            return render(request, 'cours/prof/affiche_only_group_prof.html', context={"mes_elements": create_concerne[0].concerne})
 
         else:   #Cest ici que je fais la création de mon groupe
             mes_planifier = Planification.objects.get(matiere=mon_module)
@@ -808,12 +857,35 @@ def creation_group(request):
 
 
 def ajout_note_groupe(request):
-    pass
+
+    return render(request, "")
+
+    return render(request, "cours/prof/affiche_only_group_prof.html")
 
 
 def ajout_etudiant(request):
-    pass
+
+    if request.user.is_authenticated:
+        matiere = "Element de Programmation"
+        mon_module = module.objects.get(name=matiere)
+        if_exist_in_groupe = Create_groupe.objects.filter(matiere=mon_module)
+
+        if len(if_exist_in_groupe) > 0:
+            mon_concerne = if_exist_in_groupe[0]
+            mon_concerne.concerne = eval(mon_concerne.concerne)
 
 
-def ajout_file_groupe(request):
-    pass
+            return render(request, "cours/prof/affiche_only_group_prof.html", context={"mes_elements": mon_concerne.concerne})
+
+        return render(request, "cours/prof/affiche_only_group_prof.html")
+
+    else:
+        return redirect("user:connexion")
+
+
+def ajout_work_groupe(request, matiere):
+    mon_module = module.objects.get(name=matiere)
+    mon_module = Create_groupe.objects.get(matiere=mon_module)
+    print(mon_module.liste_date)
+
+    return render(request, 'cours/vue_etudiant/depot_note.html')
