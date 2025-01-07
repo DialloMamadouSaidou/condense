@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>Cours</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="stylesheet" href="{% static 'cours/css/style_prof/style_programme.css' %}">
+</head>
+<body>
+
+<div id="content-general">
+    <h3 class="entete">Vos choix de programme</h3>
+
+    <div class="programme">
+        {% for item in element %}
+        <p class="content-programme"><a href="{% url 'cours:module' ids=item.identifiant %}">{{ item.name }}</a></p>
+        {% endfor %}
+
+    </div>
+
+</div>
+</body>
+</html>
+<!--
+.programme {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 400px;
+    padding: 70px 50px;
+
+    font-size: 25px;
+}
+
+.content-programme a {
+
+    font-family: Lato, serif;
+    font-weight: bold;
+    text-decoration: none;
+
+}
+
+.entete {
+    text-align: center;
+    text-decoration: underline;
+    position: relative;
+    top: 100px;
+}
+
+-->

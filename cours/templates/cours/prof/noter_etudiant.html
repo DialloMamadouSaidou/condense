@@ -1,0 +1,100 @@
+{% extends 'base_user.html' %}
+
+{% load static %}
+
+{% block content %}
+    <h3>Noté vos etudiant <strong id="titre">{{ cours }}</strong></h3>
+
+    <p>La notation sera comme suit: </p>
+    <p>Donnez la note majorante de chaque exam </p>
+    <p>Le système se chargera de calculer la moyenne en tenant compte des ponderations</p>
+<form method="POST" id="monform">
+    {% csrf_token %}
+    {% for item, valeur in ponde.items %}
+            <div>
+                <label>{{ item }}</label>
+                <input type="number" placeholder="Donnez la note majorante" value="{{ valeur }}" readonly>
+            </div>
+    {% endfor %}
+    <table class="table">
+        <thead>
+                <tr>
+                    <th scope="col">Etudiant</th>
+                    {%  for index in ponde %}
+                    <th scope="col">{{ index }}</th>
+                    {% endfor %}
+
+                </tr>
+        </thead>
+        <tbody>
+
+        {% for key, value in note.items %}
+            <tr>
+                <td scope="row">{{ key }}</td>
+
+                {% for item in value %}
+                    {% for k, v in item.items %}
+                        {% if v == '' %}
+                            <td>
+                                <input type="number" name="{{ key }} {{ k }}" placeholder="donnez votre note" class="mes_inputs" id="{{ key }} {{ k }}">
+                            </td>
+                        {% else %}
+                        <td>
+                            <input type="text" value="{{ v }}">
+                        </td>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" class="btn btn-info" value="enregistrer">
+</form>
+
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+    console.log("hello world");
+    $("#titre").hide();
+
+$("#monform").on("submit", function(e){
+
+e.preventDefault();
+var mes_data = $(this).serialize();
+var le_titre = document.getElementById("titre").innerHTML;
+var mon_url = `/cours/note/${le_titre}`;
+
+$.ajax({
+    type: "POST",
+    url : mon_url,
+    data: mes_data,
+
+    success: function(response){
+        console.log("hello world");
+
+        var mes_inputs = document.querySelectorAll(".mes_inputs");
+        mes_inputs.forEach(function(item){
+            $(item).val('');
+        });
+
+        if(response.validate){
+            window.location.href = response.validate;
+        };
+
+        if(response.big_error){
+            console.log(response.big_error);
+        }
+
+    }
+
+});
+
+});
+</script>
+
+
+{% endblock %}

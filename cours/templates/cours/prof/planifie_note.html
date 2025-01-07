@@ -1,0 +1,133 @@
+{% extends 'base_user.html' %}
+{% load static %}
+
+
+{% block content %}
+        <h2>Hello la planification mon bon prof!</h2>
+        <p>Donnez la repartition de vos note <strong id="crs">{{ cours }}</strong></p>
+        <div>
+
+
+                <form method="POST" id="mon_id">
+                        {% csrf_token %}
+                       <input type="text" placeholder="ajouter un examen" name="nom~0" data-index="com">
+                       <p class="error" id="0Nom">Vous devez entrez un Nom de chapitre</p>
+                       <input type="number" name="ponderation~0" data-index="com">
+                       <p class="error" id="0ponderation">Vous devez entrez une ponderation</p>
+                        <div id="ajoute">
+
+                        </div>
+                        <p id="ajouter">Ajouter</p>
+                        <div id="true_error">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-file-excel-fill" viewBox="0 0 16 16">
+                                <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M5.884 4.68 8 7.219l2.116-2.54a.5.5 0 1 1 .768.641L8.651 8l2.233 2.68a.5.5 0 0 1-.768.64L8 8.781l-2.116 2.54a.5.5 0 0 1-.768-.641L7.349 8 5.116 5.32a.5.5 0 1 1 .768-.64"/>
+                            </svg>
+                        </div>
+                       <button class="btn soummission btn-warning">soumettre</button>
+                </form>
+
+        </div>
+
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+
+var index=1;
+var le_cours = document.querySelector("#crs").innerHTML;
+console.log(le_cours);
+var indexis = 1;
+$("#true_error").hide();
+var mes_erreurs = document.querySelectorAll(".error");
+
+mes_erreurs.forEach(function(item){
+    $(item).hide();
+});
+
+$("#ajouter").click(function(){
+
+    var names="nom~"+indexis;
+    var ajoutes = "ponderation~"+indexis;
+    var le_div = `
+    <div>
+    <input type='text' name=${names} data-index='com' placeholder='Entrez le nom de votre examen'>
+    <p class='error' id='${indexis}Nom'>Vous devez entrez un nom dexament</p>
+     <input type='number' name=${ajoutes} data-index='com' placeholder='Entrez une ponderation pour votre examen'>
+     <p class='error' id='${indexis}ponderation'>Vous devez entrez une ponderation</p>
+    </div>
+    `;
+
+
+    $("#ajoute").append(le_div);
+
+    var mon_erreur = document.querySelectorAll(".error");
+
+     mon_erreur.forEach(function(item){
+    $(item).hide();
+});
+
+    indexis += 1;
+});
+
+$("#mon_id").on("submit", function(e){
+e.preventDefault();
+var mes_data = $(this).serialize();
+var mon_url = `/cours/planifie/${le_cours}`;
+$.ajax({
+    type: "POST",
+    url: mon_url,
+    data: mes_data,
+    success: function(response){
+        console.log("hello world");
+        console.log(response.not_error);
+        if(response.mon_erreur){
+            var mon_id = response.mon_erreur;
+            $("#"+mon_id).show();
+
+            console.log(response.mon_erreur);
+
+            if(response.content){
+                var mes_content = response.content;
+
+                var mes_inputs = document.querySelectorAll("[data-index='com']");
+                mes_inputs.forEach(function(item){
+                    var le_nom = item.name;
+                    if(mes_content.includes(le_nom)){
+                        console.log("Nom: "+ le_nom);
+                    }
+
+                });
+
+            };
+
+
+        };
+        if(response.mon_erreur){
+                $("#true_error").show();;
+        };
+
+        if(response.mon_url){
+            window.location.href = response.mon_url;
+        };
+
+        if(response.not_error){
+            var mes_inputs = document.querySelectorAll("[data-index='com']");
+            mes_inputs.forEach(function(item){
+                $(item).val('');
+            });
+        }
+    }
+
+})
+
+});
+function supprimerMessage(button){
+        var parent_div = button.parentElement;
+
+        parent_div.remove();
+}
+
+</script>
+
+{% endblock %}

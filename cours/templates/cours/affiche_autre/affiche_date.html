@@ -1,0 +1,147 @@
+{% extends 'base_user.html' %}
+
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'cours/css/autre_css/gestion_complet.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h3>Affiche date</h3>
+
+<form method="POST" id="mon_form">
+    {% csrf_token %}
+    <div id="container-total">
+        <div id="commande">
+            <div class="fonctions">
+                <div id="add_etudiant" >Ajouter un etudiant</div>
+            </div>
+            <div class="fonctions">
+                <div id="rechercher_etudiant" >Rechercher Etudiant</div>
+            </div>
+            <button type="submit">Déposer mon élément!</button>
+        </div>
+
+        <div id="affichage">
+            <p id="affiche">Mamadous</p>
+
+            <div id="tableau">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>
+                                Email
+                            </th>
+
+                            <th>
+                                Examen
+                            </th>
+
+                            <th>Fichier</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>
+                                Diallo
+                            </td>
+
+                            <td>
+                                10
+                            </td>
+
+                            <td>
+                                fichier.pdf
+                            </td>
+                        </tr>
+
+                        <tr class="highlight-row">
+                            <td>
+                                Nene an
+                            </td>
+
+                            <td>
+                                10
+                            </td>
+
+                            <td>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    var mon_form = document.getElementById("mon_form");
+
+    // Fonction pour récupérer un cookie (le cookie CSRF ici)
+    function getCookie(cookie_name) {
+        let cookie_value = null;
+        if (document.cookie && document.cookie !== "") {
+            let cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.substring(0, cookie_name.length + 1) === (cookie_name + '=')) {
+                    cookie_value = decodeURIComponent(cookie.substring(cookie_name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookie_value;
+    }
+
+    let csrftoken = getCookie('csrftoken'); // Récupération du token CSRF
+
+    console.log("CSRF Token: ", csrftoken); // Vérifiez que le token est bien récupéré
+
+    // Ajout du token CSRF à toutes les requêtes Ajax
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!(/^GET|HEAD|OPTIONS|TRACE$/i.test(settings.type)) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    // Soumission du formulaire via Ajax
+    mon_form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        // Récupérer la valeur du champ 'name' au moment de la soumission
+        var nom = document.getElementById("name").value;
+
+        $.ajax({
+            type: "POST",
+            url: "/cours/gestion_prof",
+            data: {
+                'nom': nom  // Envoi de la donnée 'nom'
+            },
+            success: function(response) {
+                console.log("Réponse réussie : ", response);
+                // Mettez à jour l'affichage si nécessaire
+                document.getElementById("affiche").innerText = response.message;
+            },
+            error: function(xhr, status, error) {
+                console.error("Erreur : ", error);
+            }
+        });
+
+        console.log("Requête envoyée avec succès !");
+    });
+</script>
+
+{% endblock %}

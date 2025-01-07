@@ -1,0 +1,118 @@
+{% extends 'base_user.html' %}
+
+{% load static %}
+
+{% block css %}
+
+    <link rel="stylesheet" href="{% static 'cours/css/student/depot_group.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    <h2>Depot Note</h2>
+
+<p id="date">{{ date_fin }}</p>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+<table class="">
+
+<thead>
+    <tr>
+        <th>Groupe</th>
+        <th>{{ grp }}</th>
+    </tr>
+
+</thead>
+<tbody>
+    <tr>
+        <td>Nom de lexam</td>
+        <td>{{ nom_exam }}</td>
+    </tr>
+    <tr>
+        <td>Statut</td>
+        <td>{{ statut }}</td>
+    </tr>
+    <tr>
+        <td>Note</td>
+
+
+        <td id="note-me">{{ estnote }}</td>
+    </tr>
+
+    <tr>
+        <td>date_restante</td>
+        <td id="date_limite">??</td>
+    </tr>
+
+    <tr >
+        <td class="depot">Remise de Fichier</td>
+        <td>
+
+
+        {% if pdf %}
+             {{ pdf }}
+
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-x-fill" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m6.146-2.854a.5.5 0 0 1 .708 0L14 6.293l1.146-1.147a.5.5 0 0 1 .708.708L14.707 7l1.147 1.146a.5.5 0 0 1-.708.708L14 7.707l-1.146 1.147a.5.5 0 0 1-.708-.708L13.293 7l-1.147-1.146a.5.5 0 0 1 0-.708"/>
+          </svg>
+        {% else  %}
+             <input type="file" accept=".pdf" name="pdf">
+         {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td>Commentaire</td>
+        <td>....</td>
+    </tr>
+</tbody>
+</table>
+    <input type="submit" value="Deposer">
+</form>
+{% endblock %}
+
+{% block js %}
+
+<script>
+
+    let ma_note = document.getElementById("note-me");
+
+    if(ma_note.innerHTML == "False"){
+        console.log("Pas de Note");
+        ma_note.innerHTML = " Pas de Note"
+    }else{
+        console.log("Vous avez belle et bien note!");
+    }
+    console.log(ma_note.innerHTML);
+    let date_limite = document.getElementById("date_limite");
+    let mon_url = document.getElementById("date").innerHTML;
+    mon_url = `/cours/update_count_date/${mon_url}`;
+    function setLimite(){
+
+        $.ajax({
+            url : mon_url,
+            method: 'GET',
+
+            success: function(data){
+
+                if(data.depassement_date){
+
+                    date_limite.innerHTML = "Depassement de limite de depo "
+                }
+                else{
+                    date_limite.innerHTML =
+
+                        data.days + "jours " +
+                        data.hours + " heure " +
+                        data.minutes + "minute" +
+                        data.seconds + "seconds "
+
+                    }
+
+            }
+        })
+    }
+
+    setInterval(setLimite, 1000);
+</script>
+{% endblock %}

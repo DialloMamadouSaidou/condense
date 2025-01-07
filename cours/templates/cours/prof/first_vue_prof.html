@@ -1,0 +1,23 @@
+{% extends 'base_user.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'cours/css/style_prof/first_style_prof.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+    <h3>Hello Monsieur Comment allez vous?</h3>
+
+    <div class="conteneur">
+
+    {% for item in courses %}
+        <div class="item">
+                        <a href="{% url 'cours:chapitre' ids=item.identifiant %}">{{ item.name }}</a>
+        </div>
+    {% endfor %}
+    </div>
+
+    <a href="{{ redirect }}">dernier argument</a>
+{% endblock %}

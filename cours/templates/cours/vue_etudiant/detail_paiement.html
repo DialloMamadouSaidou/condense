@@ -1,0 +1,32 @@
+
+{% extends 'base_user.html' %}
+
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'cours/css/detail_paiement.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h3>Hello Mamadou</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Depense</th>
+                <th scope="col">Prix</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key, value in cours.items %}
+            <tr>
+
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <input class="btn btn-primary" value="payer">
+{% endblock %}

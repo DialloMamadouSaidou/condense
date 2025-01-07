@@ -1,0 +1,1274 @@
+{% extends 'base_user.html' %}
+
+{% load static %}
+
+{% load bootstrap_icons %}
+
+{% block css %}
+
+
+<link rel="stylesheet" href="{% static 'cours/css/style_vue.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div id="caracterisation">
+
+    Bienvenu Pami nous dans votre espace de travail, Mr Saidou
+</div>
+
+<div id="menu-bar">
+
+
+    <div id="mon_menu">
+        <span class="menu">Votre Menu!!</span>
+
+        <hr>
+
+        <div class="option_choice">
+            <div class="option_prof">
+                <a href="#" id="creation_de_chapitre">Crée chapitre</a>
+            </div>
+
+            <div class="option_prof" id="modification_chapitre">
+                <a href="#">Modifier chapitre!</a>
+            </div>
+
+            <div class="option_prof">
+                <a href="#" id="modification-date-de-depot">Modifier date de depot de message</a>
+            </div>
+
+            <div class="option_prof">
+                <a href="#" id="create_config">Crée une configuration</a>
+            </div>
+
+            <button id="createPopup">Créer un chapitre.</button>
+        </div>
+        <hr>
+
+        {% for item in dico_abrs %}
+
+        {% for key, value in item.items %}
+        <div class="mon_devoir">
+            <a href="{% url 'cours:lecture' dir='creation_tp_prof' name=value %}">{{ key }}</a> <span>index</span>
+        </div>
+        {% endfor %}
+
+        {% endfor %}
+
+
+        <div class="depot_groupe">
+
+            <div class="sup">
+                <p>Choisissez lexam ou les examens qui seront concerné(s)</p>
+
+
+                {% for item in ma_note %}
+
+                {% for key, v in item.items %}
+
+                {% if v == "" %}
+
+                {% else %}
+                <div class="d-flex justify-content-around">
+                    <div>
+                        <input type="checkbox" value="" checked disabled>
+                        <label>{{ k }}</label>
+                    </div>
+                    <div class="ms-5 d-flex">
+                        <div>{{ v }}</div>
+                        <div class="ms-5 suppression" id="{{ key }}-delete">
+
+                            <button>
+                                {% bs_icon 'backspace' color='red' %}
+
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% endfor %}
+                {% endfor %}
+            </div>
+
+        </div>
+
+
+        <div id="chapitre">
+
+            <form method="POST" id="mon-form" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- je suis ici -->
+
+                <div class="d-block">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-file-earmark-plus-fill ajoute-moi" viewBox="0 0 16 16" id="{{ k }},sup">
+                        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M8.5 7v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 1 0"/>
+                    </svg>
+                    Ajouter un travail
+                </div>
+
+                <div id="les_examens">
+                    {% for key in dico_abr %}
+
+                    <div class="mes-check" id="{{ key }}-check">
+                        <input type="checkbox" value="" id="{{ key }}" class="add">
+                        <label id="{{ key }}-lab">{{ key }}</label>
+                    </div>
+
+
+                    <!--<p id="" class="titre_depo">{{ key }}</p>-->
+                    {% endfor %}
+                </div>
+
+
+                <div class="calendrier-container" id="calendrier">
+
+                    <div class="mes_information_cachement">
+                        <span class="nom_du_mois">Mois:  </span><strong class="month" id="{{ k }}-month">{{ le_mois
+                        }}</strong>/ <strong id="years">{{ lanne }}</strong>
+                    </div>
+
+                    <div id="entetecalendrier">
+                        <div id="moissss">{{ mois_actuel }}</div>
+                        <div class="d-flex controle">
+                            <div class="rewind" id="-rewind-">{% bs_icon 'caret-right-fill' size='2em' color='red' %}
+                            </div>
+                            <div class="retour" id="-retour-">{% bs_icon 'caret-left-fill' size='2em' color='red' %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="{{ key }}-calendrier-{{ k }}" class="mon_calendar_perso">
+                        <!-- ce id me permettra de recuperer le chapitre et lexamen dans lequel la g sera ajouté-->
+                        {{ calendrier|safe }}
+                    </div>
+                    <input type="time" id="horaire" name="horaire">
+
+                    <div id="">
+                        {% for content in ma_note %}
+
+                        {% for key, value in content.items %}
+
+
+                        <div class="contenant_deposition">
+                            {% if value != "" %}
+                            <label for="{{ key }}-file">{{ key }}</label>
+                            {% endif %}
+                            <input type="file" name="{{ key }}" id="{{ key }}-file" class="deps_file">
+
+                        </div>
+
+
+                        {% endfor %}
+
+                        {% endfor %}
+                    </div>
+
+                    <p class="error-red">Vous pouvez faire qu'une seule date pour le début du travail</p>
+                    <p class="error-bleu">Vous ne pouvez que choisir une date pour le depot du travail</p>
+                </div>
+
+
+                <!---<img src="{% static 'cours/backpak.svg' %}" width="32" height="32">-->
+                <div id="depot_de_tp_pour_les_etudiants">
+                    <h2>vous devez ajoutez vos fichier à deposer ici</h2>
+                </div>
+
+                <input type="text" readonly name="consigne-delete" placeholder="je suis la pour la suppression"
+                       id="ordre_suppression">
+                <textarea id="couleur-rouge" name="couleur-rouge" style="display: none;"></textarea>
+                <textarea id="couleur-bleu" name="couleur-bleu" style="display: none;"></textarea>
+                <textarea id="couleur-efface" name="delete-couleur" style="display: none"></textarea>
+                <textarea id="couleur-efface-bleu" name="delete-couleur-bleu" style="display: none"></textarea>
+
+
+                <input type="text" name="mois" id="mois" style="display: none">
+                <input type="text" name="rewind-id" id="rewind-id" style="display: none">
+
+                <input type="text" name="retour-id" id="retour-id" style="display: none">
+
+
+                <input type="submit" value="deposer" id="depose_me">
+
+                <input name="dep" id="valeur-dep" type="text" style="display: none;">
+
+                <input id="test-red" type="text" value="soumettre">
+
+                <div id="popupsContainer"></div>
+
+
+                <div id="modification_concernation">
+
+                        <p>Entrez le choix de votre examen</p>
+
+                        <label for="1d">Voulez vous modifier une date ?</label>
+                        <input type="radio" value="1d"  name="modif_date" id="1d">
+
+                        <label for="2d">Voulez vous supprimez une date ?</label>
+                        <input type="radio" value="2d" id="2d" name="sup_date">
+
+                        <label for="3d">Voulez vous augmentez la marge de note ?</label>
+                        <input type="radio" value="3d" id="3d" name="marge_note">
+
+                </div>
+            </form>
+
+        </div>
+
+
+    </div>
+
+
+    <div id="container-all-element">
+        <h3>Mes Chapitres</h3>
+
+
+        <!--<button class="btn btn-primary">Crée un Chapitre</button>-->
+        <h2>Ajouter un chapitre</h2>
+
+        <div id="Infor">
+
+            <h2>Information</h2>
+
+
+            <ul>
+                <li>En cliquant sur une date si la couleur rouge indique la date daffichage du travail dans le compte
+                    des
+                    étudiants
+                </li>
+                <li>En cliquant une deuxième fois la couleur bleu saffiche pour indiquer la date de dépot du travail par
+                    les
+                    étudiants
+                </li>
+                <li>En ne rentrant pas une date la date initial du commencement de travail sera la date à l'instant(donc
+                    elle est fonctionnel)
+                </li>
+                <li>Une épreuve ne peut pas avoir deux dates de debut et de fin, et doit contenir tjrs une date de depot
+                    par
+                    les étudiants
+                </li>
+            </ul>
+
+        </div>
+
+
+        <!--
+        <div id="form-add-chapter">
+            <h3>Veuillez entrez le nom du chapitre que vous voulez svp</h3>
+            <form method="POST">
+
+                {% csrf_token %}
+                <label for="add-chapter"></label>
+                <input type="text" id="add-chapter" name="add-chapter">
+
+                <input type="submit" value="add-chapter">
+            </form>
+        </div>
+        -->
+        <div class="popup-overlay" id="popup">
+            <div id="popups">
+                <p>Voulez-vous supprimer le travail ?</p>
+                <button class="yes" id="confirmYes">Oui</button>
+                <button class="no" id="confirmNo">Non</button>
+            </div>
+        </div>
+        <!--<p id="ajoute-moi-chapitre">{% bs_icon 'file-arrow-up' size='3.25em' color='red' %}</p>-->
+        <a href="#">Note <strong id="mon_index">{{ index }}</strong></a>
+
+
+        <p id="le_ids">{{ ids }}</p>
+        <!--{% bs_icon '0-circle-fill' color='red' %}-->
+
+        {% for k, v in lesson.items %}
+
+        <div class="d-flex justify-content-between">
+
+            <div class="d-flex justify-content-between">
+                <p class="titre">{{ k }}</p>
+
+            </div>
+            <div class="d-flex">
+
+                <div id="{{ k }}~1" class="toggle-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                        <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                    </svg>
+                </div>
+
+                <div id="{{ k }}~2" class="toggle-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-caret-up-fill" viewBox="0 0 16 16">
+                        <path d="m7.247 4.86-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div id="{{ k }}">
+            {% for item in v %}
+            <p class="lien"><a href="#">{{ item.name }}</a></p>
+            {% endfor %}
+        </div>
+
+        <hr>
+        {% endfor %}
+
+
+        <div id="new">
+
+        </div>
+
+    </div>
+
+
+
+
+</div>
+
+
+<div id="modification_date" draggable="true">
+
+    Veuillez choisir le chapitre dont vous voulez modifier la date
+
+
+    <form method="POST" id="form2" action="{% url 'cours:programme' %}">
+
+        {% csrf_token %}
+          {% for item in ma_note %}
+
+                    {% for key, value in item.items %}
+
+                        {% if value != "" %}
+                            <div>
+                            <input type="text" id="{{ key }}-modif_date" name="{{ key }}" class="radiowangal" value="2">
+                            <label for="{{ key }}-modif_date">{{ key }}</label>
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+          {% endfor %}
+
+        <div>
+        <input type="submit" value="Enregistrer">
+            </div>
+    </form>
+</div>
+
+
+<!--
+<script src="/static/cours/jss/prof/planification_chapitre.js"></script>
+
+<script src="/static/cours/jss/prof/traitement_supression_chapitre.js"></script>
+
+-->
+<script src="/static/cours/jss/prof/planification_conf.js"></script>
+{% endblock %}
+
+{% block js %}
+
+//
+<script>
+
+    $(document).ready(function () {
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const calendrier_annuel = {
+            "1": "Janvier", "2": "Février", "3": "Mars", "4": "Avril", "5": "Mai", "6": "Juin",
+            "7": "Juillet", "8": "Août", "9": "Septembre", "10": "Octobre", "11": "Novembre", "12": "Decembre"
+        }
+
+        console.log(calendrier_annuel["3"]);
+        //Pour le deplacement du tableau
+        const tableau = document.getElementById("tableau");
+
+        let isDragging = false; // Pour savoir si on déplace le tableau
+        let offsetX = 0; // Décalage horizontal entre le tableau et la souris
+        let offsetY = 0; // Décalage vertical entre le tableau et la souris
+
+        // Quand l'utilisateur commence à cliquer sur le tableau
+        tableau.addEventListener("mousedown", (e) => {
+            isDragging = true;
+
+            // Calcul de l'offset entre le tableau et le curseur de la souris
+            offsetX = e.clientX - tableau.getBoundingClientRect().left;
+            offsetY = e.clientY - tableau.getBoundingClientRect().top;
+
+            // Ajout d'un style pour indiquer que le tableau est en train de bouger
+            tableau.style.opacity = "0.7";
+        });
+
+        // Quand l'utilisateur bouge la souris
+        document.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                // Mise à jour de la position du tableau
+                tableau.style.left = e.clientX - offsetX + "px";
+                tableau.style.top = e.clientY - offsetY + "px";
+            }
+        });
+
+        // Quand l'utilisateur relâche le clic
+        document.addEventListener("mouseup", () => {
+            if (isDragging) {
+                isDragging = false;
+
+                // Restauration de l'opacité d'origine
+                tableau.style.opacity = "1";
+            }
+        });
+// Récupération des éléments principaux
+        const button = document.querySelector('#createPopup');
+        const container = document.querySelector('#popupsContainer');
+
+// Compteur pour les popups
+        let popupCount = 0;
+
+// Fonction pour rendre un popup déplaçable
+        function makeDraggable(popup) {
+            const header = popup.querySelector('.popup-header');
+            let offsetX = 0, offsetY = 0, isDragging = false;
+
+            // Quand on clique et commence à déplacer
+            header.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - popup.offsetLeft;
+                offsetY = e.clientY - popup.offsetTop;
+                popup.style.cursor = 'grabbing';
+            });
+
+            // Quand on déplace la souris
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const x = e.clientX - offsetX;
+                    const y = e.clientY - offsetY;
+                    popup.style.left = `${x}px`;
+                    popup.style.top = `${y}px`;
+                }
+            });
+
+            // Quand on relâche la souris
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                popup.style.cursor = 'grab';
+            });
+        }
+
+// Fonction pour créer un popup
+        function createPopup() {
+            popupCount++;
+
+            // Création d'un élément de popup
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.style.left = `${Math.random() * 50 + 20}px`; // Position initiale aléatoire
+            popup.style.top = `${Math.random() * 50 + 20}px`; // Position initiale aléatoire
+            popup.innerHTML = `
+        <div class="popup-header">Popup #${popupCount}</div>
+        <button class="popup-close">X</button>
+        <div>Entrez votre chapitre</div>
+
+        <input type="text" placeholder="Entrez votre nom de chapitre" name="create-chapitre+${popupCount}">
+    `;
+
+            // Ajout d'un écouteur pour fermer le popup
+            const closeButton = popup.querySelector('.popup-close');
+            closeButton.addEventListener('click', () => {
+                popup.remove();
+            });
+
+            // Rendre le popup déplaçable
+            makeDraggable(popup);
+
+            // Ajout du popup dans le container
+            container.appendChild(popup);
+        }
+
+// Écouteur sur le bouton pour créer des popups
+        button.addEventListener('click', createPopup);
+
+
+        document.querySelector(".mes_information_cachement").style.display = 'none';
+        document.querySelector("#ordre_suppression").style.display = "none";
+
+        let mon_popup = document.querySelector("#popups");
+        mon_popup.style.display = 'none';
+
+        //une fonction qui donne mes id
+        //le id qui est là sera est juste pour mes tables
+
+//Partie concernant beaucoup les etudiant et peu  les profs
+
+        let mes_devoir = document.querySelectorAll(".mon_devoir");
+
+//je dois géré ici la suprpression des messages à partir dici.
+
+        console.log("hello mamadou saidou");
+        let mes_suppre_me = document.querySelectorAll('.suppression');
+
+//let mon_popups = document.getElementById('popup');
+
+        let confirmyes = document.querySelector("#confirmYes");
+        let confirmno = document.querySelector("#confirmNo");
+
+
+        for (let item of mes_suppre_me) {
+            item.addEventListener('click', function () {
+                mon_popup.style.backgroundColor = 'orange';
+                console.log('On ma cliqué par là');
+                console.log(item.id);
+
+                mon_popup.style.display = "block";
+
+                confirmyes.addEventListener('click', function () {
+                    document.querySelector("#ordre_suppression").value = "";
+                    document.querySelector("#ordre_suppression").value = item.id;
+                    document.body.style.backgroundColor = 'orange';
+                    $("#mon-form").submit();
+                })
+                confirmno.addEventListener('click', function () {
+                    document.querySelector("#ordre_suppression").value = "";
+                    mon_popup.style.display = "none";
+                })
+
+            })
+        }
+//
+
+        for (item of mes_devoir) {
+
+            item.addEventListener("click", function () {
+
+                console.log("hello mamadou");
+            })
+        }
+////
+        let mes_examens = document.getElementById("les_examens");
+        let mon_calendrier_in_my_body = document.getElementById("calendrier");
+
+        mon_calendrier_in_my_body.style.display = "none";
+        mes_examens.style.display = "none";
+
+        let mon_dossier_de_document_a_deposer = document.getElementById("depot_de_tp_pour_les_etudiants");
+
+        mon_dossier_de_document_a_deposer.style.display = "none";
+
+
+        let mon_index_daffiche_form = document.getElementById("mon_index").innerHTML;
+
+        console.log(mon_index_daffiche_form);
+        if (mon_index_daffiche_form === "0") {
+            document.getElementById("form-add-chapter").style.display = 'none';
+            mon_dossier_de_document_a_deposer.style.display = "block";
+        }
+
+        (function give_id() {
+            let my_all_table = document.querySelectorAll('.table');
+            for (item of my_all_table) {
+                let mon_id = item.parentNode.id;
+                //console.log(mon_id.split('-'));
+                let separer = mon_id.split('-');
+                let mon_div = document.getElementById(mon_id);
+                let ma_classe = mon_div.querySelectorAll('.date');
+                ma_classe.forEach(items => {
+                    let data = items.getAttribute('data-index');
+                    items.id = data + '- ' + separer[0] + '- ' + separer[2];
+                });
+
+
+            }
+            console.log("Mes elements sont: " + my_all_table.length);
+        })();
+
+        //Ici je fais tout mes elements à cacher
+        $("#le_ids").hide();
+        $('div[id$="~1"]').hide();
+        $("#couleur-rouge").hide();
+        $("#couleur-bleu").hide();
+        $(".error-red").hide();
+        $(".error-bleu").hide();
+        $(".retour").hide();
+        //
+
+
+        //la fonction next pour le rewind
+        //Cest ici que se passera l'une des parties les plus difficiles de mon code js
+
+        $(".rewind").click(function () {
+
+            let mon_id = this.id;
+            let mon_vrai_mois;
+            mon_id = mon_id.split('-')[0];
+            let mon_element = document.getElementById(mon_id + "-month");
+            let valeur = parseInt(mon_element.innerHTML);
+            valeur += 1;
+            console.log("Là cest encore notre programme daffaire!");
+            mon_vrai_mois = valeur.toString();
+            if (valeur <= 12 && valeur > 0) {
+
+
+                mon_element.innerHTML = valeur;
+                document.getElementById("mois").value = valeur;
+                document.getElementById("rewind-id").value = this.id;
+                document.querySelector("#moissss").innerHTML = calendrier_annuel[mon_vrai_mois];
+                //console.log(calendrier_annuel[mon_vrai_mois]);
+                //document.querySelector("#moissss").innerHTML = calendrier_annuel[mon_vrai_mois];
+                $("#mon-form").submit();
+            }
+            $(".retour").show();
+
+        })
+
+        $(".retour").click(function () {
+            let mon_id = this.id;
+            let mon_vrai_moi;
+            mon_id = mon_id.split('-')[0];
+            let mon_element = document.getElementById(mon_id + "-month");
+            let valeur = parseInt(mon_element.innerHTML);
+
+            valeur -= 1;
+            //valeur = valeur.toString();
+            mon_vrai_moi = valeur.toString();
+            //console.log(valeur);
+            mon_element.innerHTML = valeur;
+            //valeur = parseInt(valeur);
+            console.log(calendrier_annuel[mon_vrai_moi]);
+            document.querySelector("#moissss").innerHTML = calendrier_annuel[mon_vrai_moi];
+            console.log("on reviens");
+            //document.querySelector(".month").innerHTML = calendrier_annuel[mon_vrai_moi];
+            //valeur = parseInt(valeur);
+            document.getElementById("mois").value = valeur;
+            document.getElementById("retour-id").value = this.id;
+
+            $("#mon-form").submit();
+
+        })
+
+
+        $(".toggle-btn").click(function () {
+            const mon_id = $(this).attr('id');
+            const [name, number] = mon_id.split("~");
+            if (number === "1") {
+                $(this).hide();
+                $("#" + name).show();
+                $("#" + name + "\\~2").show();
+            } else if (number === "2") {
+                $(this).hide();
+                $("#" + name).hide();
+                $("#" + name + "\\~1").show();
+            }
+        });
+        //$(".dep_file").hide();
+
+
+        let aid_color = 0;
+        let couleur_red = 0;
+        let couleur_bleu = 0;
+        let couleur_desactive = 0;
+
+        const col_rouge = (e) => {
+            let all_date = document.querySelectorAll(".date");
+            let array = [];
+            let array_bleu = [];
+            let array_white = [];
+            let iteration = iteration_bleu = iteration_white = 0;
+            for (item of all_date) {
+                let mon_id1 = item.id;
+                let element2 = document.getElementById(mon_id1);
+
+                if (element2.style.backgroundColor === 'red') {
+                    if (!array.includes(mon_id1)) {
+                        array[iteration] = mon_id1;
+                        iteration++;
+                    }
+
+                }
+                if (element2.style.backgroundColor === 'blue') {
+                    if (!array_bleu.includes(mon_id1)) {
+                        array_bleu[iteration_bleu] = mon_id1;
+                        iteration_bleu++;
+                    }
+                }
+
+            }
+            return {"le_rouge": array, "le_bleu": array_bleu};
+        };
+
+        /*
+        let all_date = document.querySelectorAll('date');
+
+        for(item of all_date){
+
+            item.addEventListener('click', function(){
+
+
+            })
+        }
+        */
+        $(".date").click(function () {
+
+            let mon_id = this.id;
+            console.log(mon_id);
+            let mon_element = document.getElementById(mon_id);
+
+            if (aid_color === 0) {
+
+                mon_element.style.backgroundColor = 'red';
+                //document.querySelector(".dep_file").style.display = "block";
+                aid_color = 1;
+            } else if (aid_color === 1) {
+                mon_element.style.backgroundColor = 'blue';
+                aid_color = 2;
+                //document.querySelector(".dep_file").style.display = "block";
+            } else {
+                mon_element.style.backgroundColor = 'white';
+                aid_color = 0;
+                //document.querySelector(".dep_file").style.display = "none";
+            }
+
+        });
+
+        //traitement pour les couleur-rouges
+        let liste_rouge_general = [], rouge_changer = [];
+        let iteration_general = 0, iteration_rouge_changer = 0;
+
+        //traitement pour les couleur bleu
+
+        let liste_blue_general = [], bleu_change = [];
+        let iteration_general_bleu = 0, iteration_bleu_changer = 0;
+
+        function verif_color_red() {
+            let reponse_temp = col_rouge();
+
+            let reponse_rouge = reponse_temp.le_rouge;
+
+            for (item of reponse_rouge) {
+
+                if (!liste_rouge_general.includes(item)) {
+
+                    liste_rouge_general[iteration_general] = item;
+                    iteration_general++;
+                }
+
+            }
+            return liste_rouge_general;
+        }
+
+
+        function red_changer() {
+
+            let temp_valeur = verif_color_red();
+
+            let temp = "";
+            let mon_indexs = -1;
+
+            for (item of temp_valeur) {
+                let elementes = document.getElementById(item);
+
+                if (elementes != null) {
+                    if (elementes.style.backgroundColor !== 'red') {
+                        console.log(item + "a pour index " + temp_valeur.indexOf(item));
+                        let indexis = temp_valeur.indexOf(item);
+                        if (indexis !== -1) {
+                            temp_valeur.splice(indexis, 1);
+                            rouge_changer[iteration_rouge_changer] = item;
+                            iteration_rouge_changer++;
+                        }
+                    }
+                }
+            }
+
+            return rouge_changer;
+        }
+
+
+        function verif_color_bleu() {
+
+            let reponse_temp = col_rouge();
+
+            let reponse_rouge = reponse_temp.le_bleu;
+
+            for (item of reponse_rouge) {
+
+                if (!liste_blue_general.includes(item)) {
+
+                    liste_blue_general[iteration_general_bleu] = item;
+                    iteration_general_bleu++;
+                }
+
+            }
+            return liste_blue_general;
+        }
+
+        function bleu_changer() {
+
+            let temp_valeur = verif_color_bleu();
+
+            let temp = "";
+            let mon_indexs = -1;
+
+            for (item of temp_valeur) {
+                let elementes = document.getElementById(item);
+
+                if (elementes != null) {
+                    if (elementes.style.backgroundColor !== 'blue') {
+                        console.log(item + "a pour index " + temp_valeur.indexOf(item));
+                        let indexis = temp_valeur.indexOf(item);
+                        if (indexis !== -1) {
+                            temp_valeur.splice(indexis, 1);
+                            bleu_change[iteration_bleu_changer] = item;
+                            iteration_bleu_changer++;
+                        }
+                    }
+                }
+            }
+
+            return bleu_change;
+        }
+
+        let mon_boutton_test_red = document.getElementById("test-red");
+
+        mon_boutton_test_red.addEventListener("click", function () {
+
+            let value_stock = verif_color_bleu();
+            //let value_change_red = red_changer();
+
+            console.log("la valeur de stock est : ");
+            console.log(value_stock)
+
+            console.log("*******************************************************************");
+
+            console.log("Le tableaux des valeurs a rechanger");
+
+            let rouge_change = bleu_changer();
+
+            console.log(rouge_change);
+        })
+        ///Ici doit se passer mes transitions de couleur Initial-------->destination
+
+        let mes_datou = document.querySelectorAll(".date");
+
+        for (item of mes_datou) {
+
+            let elemente = document.getElementById(item.id);
+            console.log(elemente.style.backgroundColor);
+            if (elemente) {
+
+                elemente.addEventListener('click', function () {
+                    console.log(elemente.style.backgroundColor);
+
+                })
+            }
+        }
+
+        //ici je vais géré mon boutton next
+
+
+        let mon_content = document.getElementById("mon_index").innerHTML;
+
+        //cette partie permet de cacher loption de depot pour les personnes nont autorisé
+        //a crée un travail de dgroupe
+        if (mon_content === "0" || mon_content === "2") {
+            $("#depose_me").hide();
+            $(".depot_groupe").hide();
+        } else {
+            console.log(mon_content);
+        }
+
+        //cest ici que je gère mes problèmes de date
+
+
+        var mon_ids = document.getElementById("le_ids").innerHTML;
+        console.log(mon_ids);
+
+
+
+        const csrftoken = getCookie('csrftoken');
+
+
+        let index_ajoute_moi = 0;
+        $(".ajoute-moi").click(function () {
+
+            console.log("On ma cliqué!");
+            if (index_ajoute_moi === 0) {
+
+                mes_examens.style.display = "block";
+                //document.querySelector(".dep_file").style.display = "none";
+                index_ajoute_moi = 1;
+            } else {
+                mes_examens.style.display = "none";
+                mon_calendrier_in_my_body.style.display = "none";
+                index_ajoute_moi = 0;
+            }
+
+        });
+
+        let mes_elements_de_class_add = document.querySelectorAll('.add');
+        let mes_deps_file = document.querySelectorAll(".deps_file");
+        for (item of mes_elements_de_class_add) {
+
+            let temp_element_concerne = document.getElementById(item.id);
+
+            temp_element_concerne.addEventListener('change', function () {
+
+                if (this.checked) {
+                    console.log(temp_element_concerne.id + " je suis coche");
+                    for (element of mes_deps_file) {
+                        mon_id = element.id.split('-')[0];
+                        if (mon_id === temp_element_concerne.id) {
+                            document.getElementById(element.id).style.display = 'block';
+                        } else {
+                            document.getElementById(element.id).style.display = 'none';
+                        }
+                    }
+                    mon_calendrier_in_my_body.style.display = "block";
+                    mes_elements_de_class_add.forEach(function (el) {
+                        if (el.id !== temp_element_concerne.id) {
+                            document.getElementById(el.id).style.display = "none";
+                            document.getElementById(el.id + "-lab").style.display = "none";
+                        }
+                    })
+                } else {
+                    console.log(temp_element_concerne.id + " je suis pas coche");
+                    mon_calendrier_in_my_body.style.display = "none";
+
+                    mes_elements_de_class_add.forEach(function (el) {
+                        if (el.id !== temp_element_concerne.id) {
+                            document.getElementById(el.id).style.display = "block";
+                            document.getElementById(el.id + "-lab").style.display = "block";
+                            document.getElementById(el.id + "-check").style.display = "flex";
+                        }
+                    })
+                }
+            });
+
+        }
+
+
+        //Ici je gère juste juste lenvoie en faisant bien difference sur les bouttons cliqué
+
+        $("#depose_me").click(function () {
+
+            let le_id_cible = this.id;
+
+            $("#valeur-dep").val("1");
+        });
+
+        ///////////////////////////////////////////////////////////////////////
+        $("#mon-form").on("submit", function (e) {
+
+            e.preventDefault();
+
+            var mon_id = document.getElementById("le_ids").innerHTML;
+            var mon_url = `/cours/chap/${mon_id}`;
+            var mes_elementes = col_rouge();
+            document.getElementById("couleur-rouge").value = mes_elementes.le_rouge;
+            document.getElementById("couleur-bleu").value = mes_elementes.le_bleu;
+            document.getElementById("couleur-efface").value = red_changer();
+            document.getElementById("couleur-efface-bleu").value = bleu_changer();
+            var formData = new FormData(this);
+
+            formData.append('csrfmiddlewaretoken', csrftoken); // Ajouter le jeton CSRF dans les données du formulaire
+
+            $.ajax({
+                type: "POST",
+                url: mon_url,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+
+                    if (response.erreur) {
+                        alert("Error vous devez entrez une date");
+
+
+                    }
+                    if (response.html) {
+                        let reponse = response.html;
+                        let parser = new DOMParser();
+                        let doc = parser.parseFromString(reponse, 'text/html');
+                        let les_sous_date = doc.querySelectorAll(".date");
+                        let temp_id = response.le_vrai_id;
+
+                        let constituant = temp_id.split('-')[0] + '- ' + temp_id.split('-')[2];
+
+                        let mon_tableaux = doc.querySelector("table");
+
+                        let content = document.getElementById(temp_id);
+                        if (mon_tableaux) {
+                            let mes_interest = mon_tableaux.querySelectorAll(".date");
+                            for (let index of mes_interest) {
+                                let dataindex = index.getAttribute("data-index");
+                                index.id = dataindex + "- " + constituant;
+                            }
+
+
+                            content.innerHTML = "";
+                            content.innerHTML = mon_tableaux.outerHTML;
+
+                            $(".date").click(function () {
+                                let reponse_click = $(this).attr('id');
+                                let element_concerne = document.getElementById(reponse_click);
+                                if (aid_color === 0) {
+                                    element_concerne.style.backgroundColor = 'red';
+                                    aid_color = 1;
+                                } else if (aid_color === 1) {
+                                    element_concerne.style.backgroundColor = 'blue';
+                                    aid_color = 2;
+                                } else {
+                                    element_concerne.style.backgroundColor = 'white';
+                                    aid_color = 0;
+                                }
+                            })
+                        }
+                    }
+                    //cest ici que jaffiche mes elements selectionnés pour conserver la couleur
+                    if (response.my_blood) {
+                        let array = Array.from(response.my_blood);
+                        console.log(array);
+                        for (item of array) {
+                            item = item.toString();
+                            console.log(item);
+                            let element_cible = document.getElementById(item);
+
+                            if (element_cible) {
+                                element_cible.style.backgroundColor = 'red';
+                            } else {
+                                console.log(`cet element avec de id ${item} nexiste pas!`)
+                            }
+                        }
+                    }
+
+                    if (response.my_blue) {
+                        let array = Array.from(response.my_blue);
+                        console.log(array);
+                        for (item of array) {
+                            item = item.toString();
+                            console.log(item);
+                            let element_cible = document.getElementById(item);
+
+                            if (element_cible) {
+                                element_cible.style.backgroundColor = 'blue';
+                            } else {
+                                console.log(`cet element avec de id ${item} nexiste pas!`)
+                            }
+                        }
+                    }
+                    if (response.deposement) {
+                        //cest ici que je vais géré le depot du travail de groupe!
+                        console.log("information à deposer");
+                    }
+                    if (response.mon_url) {
+                        window.location.href = response.mon_url;
+                    }
+
+                    if (response.valeur_depot) {
+                        console.log(response.valeur_depot);
+                    }
+
+                    if (response.mon_url1) {
+                        window.location.href = response.mon_url1;
+                    }
+
+                    if (response.strong_length) {
+
+                        alert('message derreur vous ne pouvez pas entrez deux date daffichage');
+                        document.getElementById("valeur-dep").value = "";
+                    }
+
+                    if (response.not_depot) {
+
+                        if (document.querySelector("#ordre_suppression").value === "" || !response.create_chap) {
+
+                            alert('Vous devez entrez une date de depot pour les étudiant ou entrez le nom du chapitre');
+                            document.getElementById("valeur-dep").value = "";
+                        }
+
+                    }
+
+                    //cest ici que je cree mon chapitre
+                    if (response.create_chap) {
+
+                        window.location.href = response.redirection_chapitre;
+                    }
+                    if (response.error_date) {
+
+                        alert("la date final dois etre après la date de début");
+                        document.getElementById("valeur-dep").value = "";
+                    }
+
+                    if (response.obli_date) {
+                        alert("vous êtes obligé dentrez un fichier");
+                        document.getElementById("valeur-dep").value = "";
+                    }
+
+                    if (response.url_correct) {
+                        window.location.href = response.url_correct;
+                    }
+
+                    if (response.redirection) {
+                        window.location.href = response.redirection;
+
+                    }
+
+                    if (response.file_exist) {
+                        alert("Ce fichier existe déjà");
+                    }
+
+                    if (response.obli_entrez_fichier) {
+                        alert("Vous devez entrez un fichier svp");
+                        document.getElementById("valeur-dep").value = "";
+                    }
+
+                    if (response.conf_day) {
+                        alert('Pas de logique dans vos choix de date');
+                        document.getElementById("valeur-dep").value = "";
+                    }
+                    /*
+                        if(response.chap_choisi){
+
+                            window.location.href = response.redirection_chapitre2;
+                        }
+
+                     */
+                }
+            });
+            //document.querySelector("#ordre_suppression").value = "";
+        });
+
+        //creation dune configuration
+        let button_configuration = document.querySelector("#create_config");
+
+        button_configuration.addEventListener('click', function(){
+            alert("hello world");
+        })
+
+        //Modification du depot de chapitre
+         let index_check = 0;
+
+
+
+        function checked_unchecked(id_button){
+
+
+            let mon_boutton = document.getElementById(id_button);
+
+             console.log('hello world');
+
+            // Inverser l'état "checked"
+            if (index_check === 0) {
+                mon_boutton.checked = true;  // Sélectionner
+                index_check = 1;
+            } else {
+                mon_boutton.checked = false; // Désélectionner
+                index_check = 0;
+            }
+
+
+        }
+
+        let button_changement_date = document.getElementById("1d");
+        let button_supprime_date = document.getElementById("2d");
+
+
+        button_changement_date.addEventListener('click', function(){
+            checked_unchecked("1d");
+
+        });
+
+        button_supprime_date.addEventListener('click', function(){
+            checked_unchecked("2d");
+        })
+
+         let modification_date = document.querySelector('#modification_date');
+
+
+
+        modification_date.addEventListener('click', function(){
+
+
+
+        })
+
+    });
+
+
+
+    //
+
+    function make_dragable_div(id_div){
+
+        const element = document.getElementById(id_div);
+
+        element.setAttribute("draggable", true);
+    }
+
+
+    let mon_form2 = document.querySelector("#form2");
+
+    function getCookie2(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    const csrftoken2 =  getCookie2('csrftoken')
+
+    mon_form2.addEventListener('submit', function(e){
+
+        e.preventDefault();
+        let formdata = new FormData(this);
+        formdata.append('csrfmiddlewaretoken', csrftoken2);
+
+        let  mon_url = '/cours/traitement_form2'
+        $.ajax({
+
+            method: "POST",
+            url: mon_url,
+            data: formdata,
+            processData: false,  // Nécessaire pour éviter que jQuery ne traite les données
+            contentType: false,
+
+            success: function (response){
+
+                console.log("Lenvoi de message a marche")
+                console.log(response.html)
+            }
+        })
+    })
+
+    let radiowangal = document.querySelector(".radiowangal");
+
+    radiowangal.disabled = false;
+    console.log(radiowangal);
+    radiowangal.addEventListener('click', function(){
+        console.log('on ma belle et bien cliqué!')
+    })
+    //</script>
+
+{% endblock %}

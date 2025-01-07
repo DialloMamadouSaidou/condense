@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>Title</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="stylesheet"  href="{% static 'cours/css/style_prof/style_programme.css' %}">
+</head>
+<body>
+
+<div id="content-general">
+
+    <h3 class="entete">Mes modules</h3>
+
+    <div class="module">
+        {% for item in element %}
+        <p class="content-leçon"><a href="{% url 'cours:chapitre' ids=item.identifiant %}">{{ item.name|title }}</a></p>
+        {% endfor %}
+    </div>
+
+</div>
+
+</body>
+</html>

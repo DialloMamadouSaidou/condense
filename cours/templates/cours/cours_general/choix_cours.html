@@ -1,0 +1,94 @@
+{% extends 'base_user.html' %}
+
+
+{% block content %}
+
+{% load static %}
+
+        <h3>Hello Mamadou Saidou Bienvenue dans votre choix de cours.</h3>
+        <h2>Vous pouvez faire vos choix de cours ici</h2>
+        <form method="POST" id="monform">
+            {% csrf_token %}
+                {% for item in module_choices_name %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ item }}" name="option">
+                            <label class="form-check-label">
+                                {{ item|title }}
+                            </label>
+                        </div>
+                {% endfor %}
+
+                {% for item in not_choice %}
+                    <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{ item }}" name="option" disabled id="{{ item }}">
+                            <label class="form-check-label">
+                                {{ item|title }}
+                            </label>
+
+
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle click-me" viewBox="0 0 16 16" id="remove~{{ item }}">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg>
+                    </div>
+                {% endfor %}
+            <textarea id="all_content" name="recupere"></textarea>
+            <p id="error"></p>
+            <p>{{ well }}</p>
+            <p>{{ good }}</p>
+            <input type="submit" value="soumettre">
+            <input type="submit" value="Modifier">
+        </form>
+
+
+
+{% endblock %}
+
+{% block js %}
+
+<script type="text/javascript">
+    console.log("hello world!");
+$("#all_content").hide();
+var mes_buttons = document.querySelectorAll(".click-me");
+
+var mon_input = document.getElementById("all_content");
+
+mes_buttons.forEach(function(item){
+
+    item.addEventListener("click", function(){
+        var good_id = item.id;
+        var my_array = good_id.split("~");
+        var mon_id_a_desactive = my_array[1];
+
+        var mon_concerne = document.getElementById(mon_id_a_desactive);
+        mon_concerne.disabled = false;
+
+        var add_id = good_id + "\n";
+
+        mon_input.append(add_id);
+        console.log(add_id);
+    })
+
+});
+ $("#monform").on("submit", function(e){
+    e.preventDefault();
+    var content = $("#monform").serialize();
+    var option = $('input[name="option"]').map(function(){
+        return $(this).val();
+    }).get();
+ $.ajax({
+    type: "POST",
+    url: "{% url 'cours:choix_cours' %}",
+    data: content,
+    success: function(response){
+
+        if(response.mon_url){
+            window.location.href = response.mon_url;
+        };
+        $("#error").html(response.error);
+    }
+ })
+ })
+
+</script>
+{% endblock %}

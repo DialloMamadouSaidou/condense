@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family:"Space Mono", monospace, Sans-serif;
+    display: grid;
+    place-items: center;
+    font-size: 25px;
+    box-sizing: border-box;
+}
+
+.conteneur {
+        margin-top: 10%;
+        width: 80%;
+        position: relative;
+        border: 3px solid black;
+        padding-left: 10%;
+        background:none;
+}
+
+.em1, .em2, .em3, .em4 {
+    margin-bottom: 5px;
+    position: relative;
+}
+
+input[type="text"], input[type="password"] {
+    width: 60%;
+}
+
+.form_input1, .form_input2, .form_input3, .form_input4{
+        position: relative;
+        outline: none;
+        cursor: text;
+        padding-left: 10px;
+        padding-top: 10px;
+        line-height: 1.8;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        margin-top: 10px;
+}
+
+select {
+    border-radius: 10px;
+    font-size: 25px;
+}
+
+.form_label1, .form_label2, .form_label3, .form_label4{
+    position: absolute;
+    left: 15px;
+    top: -15px;
+    background: #fff;
+    padding: 0 5px;
+    font-weight: bold;
+    font-style: italic;
+}
+.element {
+    font-weight: bold;
+    font-style: italic;
+}
+.label3, .label4 {
+    position: absolute;
+    right: 41%;
+    bottom: 30px;
+}
+
+.error {
+        color: red;
+        font-style: italic;
+        font-size: 28px;
+}
+
+
+@media only screen and (max-width: 600px){
+
+    input[type="text"], input[type="password"] {
+        width: 90%;
+    }
+    .conteneur {
+        border: none;
+        width: 100%;
+        padding-left: 1%;
+        background: none;
+    }
+
+    .label3, .label4 {
+        position: absolute;
+        right: 10%;
+    }
+}
+
+
+
+

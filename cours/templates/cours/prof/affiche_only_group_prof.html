@@ -1,0 +1,272 @@
+{% extends 'base_user.html' %}
+
+{% load static %}
+
+{% block css %}
+<!-- Vos CSS ici -->
+{% endblock %}
+
+{% block content %}
+
+<h2>Hello Mamadou Saidou</h2>
+
+<h1>Les repartitions des notes! <strong id="cours">{{ crs }}</strong></h1>
+
+<div class="conteneur">
+    <form method="POST" id="only">
+        {% csrf_token %}
+    {% for group in mes_elements %}
+        {% for group_number, details in group.items %}
+            <div id="groupe-{{ group_number }}">
+                <h3>GROUPE {{ group_number }}</h3>
+
+                <div class="content1 d-flex justify-content-between">
+                    <!-- Liste des étudiants -->
+                    <div class="conteneur">
+                        <ul class="list-group" id="content{{ group_number }}">
+                            <li class="list-group-item active">Étudiants</li>
+                            {% for etudiant in details.ETUDIANT %}
+
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-around">
+
+                                    <div id="{{ etudiant }}" class="etudiant">{{ etudiant }}</div>
+
+                                    {% if etudiant %}
+                                        <div class="d-flex">
+                                            <input type="text" id="ajoutem{{ etudiant }}" class="ajoutme" name="ajoutemoi-{{ group_number }}">
+                                            <!--<button >-->
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-x-fill rm" viewBox="0 0 16 16" id="remove{{ etudiant }}">
+                                                    <path fill-rule="evenodd" d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m6.146-2.854a.5.5 0 0 1 .708 0L14 6.293l1.146-1.147a.5.5 0 0 1 .708.708L14.707 7l1.147 1.146a.5.5 0 0 1-.708.708L14 7.707l-1.146 1.147a.5.5 0 0 1-.708-.708L13.293 7l-1.147-1.146a.5.5 0 0 1 0-.708"/>
+                                                </svg>
+                                            <!--</button>-->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus-fill sup" viewBox="0 0 16 16" id="add{{ etudiant }}">
+                                                    <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                                                    <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/>
+                                            </svg>
+                                        </div>
+                                    {% else %}
+                                        <div><input type="text" placeholder="Entrez letudiant" id="" class="entre" name="name~{{ group_number }}"></div>
+                                        <div>
+                                        <!--<button class="add" data-index=""> -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-plus-fill add" viewBox="0 0 16 16" data-index="">
+                                                    <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                                                    <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/>
+                                                </svg>
+                                        <!--</button>-->
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                            </li>
+
+
+                            {% empty %}
+                                <li class="list-group-item">Aucun étudiant</li>
+                            {% endfor %}
+
+                        </ul>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="note">
+                        <p class="list-group-item active">Notes</p>
+
+
+                        {% for note in details.Note %}
+
+                            {% for key, value in note.items %}
+                               <div class="content d-flex justify-content-between">
+                                <div>{{ key }}</div>
+                                {% if value == "" %}
+                                    <div>Pas de note</div>
+                                {% else %}
+                                    <div class="note bg-info border border-primary border-2">{{ value }}</div>
+                                {% endif %}
+
+                                </div>
+                            {% endfor %}
+                        {% empty %}
+                            <p>Aucune note</p>
+                        {% endfor %}
+                        <input type="text" placeholder="Entrez ici la note du groupe">
+                    </div>
+
+                    <!-- Fichiers -->
+                    <div class="files">
+                        <p class="list-group-item active">Fichiers</p>
+                        {% for file in details.file %}
+                            {% for key, content in file.items %}
+                                {% if content == "" %}
+                                    <p>{{ key }}: <strong>Pas de fichier dispo</strong></p>
+                                {% else %}
+                                    <a href="{% url 'cours:lecture' name=file %}">
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-pdf-fill" viewBox="0 0 16 16">
+                                            <path d="M5.523 12.424q.21-.124.459-.238a8 8 0 0 1-.45.606c-.28.337-.498.516-.635.572l-.035.012a.3.3 0 0 1-.026-.044c-.056-.11-.054-.216.04-.36.106-.165.319-.354.647-.548m2.455-1.647q-.178.037-.356.078a21 21 0 0 0 .5-1.05 12 12 0 0 0 .51.858q-.326.048-.654.114m2.525.939a4 4 0 0 1-.435-.41q.344.007.612.054c.317.057.466.147.518.209a.1.1 0 0 1 .026.064.44.44 0 0 1-.06.2.3.3 0 0 1-.094.124.1.1 0 0 1-.069.015c-.09-.003-.258-.066-.498-.256M8.278 6.97c-.04.244-.108.524-.2.829a5 5 0 0 1-.089-.346c-.076-.353-.087-.63-.046-.822.038-.177.11-.248.196-.283a.5.5 0 0 1 .145-.04c.013.03.028.092.032.198q.008.183-.038.465z"/>
+                                            <path fill-rule="evenodd" d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2m5.5 1.5v2a1 1 0 0 0 1 1h2zM4.165 13.668c.09.18.23.343.438.419.207.075.412.04.58-.03.318-.13.635-.436.926-.786.333-.401.683-.927 1.021-1.51a11.7 11.7 0 0 1 1.997-.406c.3.383.61.713.91.95.28.22.603.403.934.417a.86.86 0 0 0 .51-.138c.155-.101.27-.247.354-.416.09-.181.145-.37.138-.563a.84.84 0 0 0-.2-.518c-.226-.27-.596-.4-.96-.465a5.8 5.8 0 0 0-1.335-.05 11 11 0 0 1-.98-1.686c.25-.66.437-1.284.52-1.794.036-.218.055-.426.048-.614a1.24 1.24 0 0 0-.127-.538.7.7 0 0 0-.477-.365c-.202-.043-.41 0-.601.077-.377.15-.576.47-.651.823-.073.34-.04.736.046 1.136.088.406.238.848.43 1.295a20 20 0 0 1-1.062 2.227 7.7 7.7 0 0 0-1.482.645c-.37.22-.699.48-.897.787-.21.326-.275.714-.08 1.103"/>
+                                        </svg>
+                                        {{ content }}
+                                    </a>
+                                {% endif %}
+                           {% endfor %}
+                        {% empty %}
+                            <p>Aucun fichier</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-patch-plus add-line" viewBox="0 0 16 16" data-index="{{ group_number }}" id="add-line~{{ group_number }}">
+                <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
+                <path d="m10.273 2.513-.921-.944.715-.698.622.637.89-.011a2.89 2.89 0 0 1 2.924 2.924l-.01.89.636.622a2.89 2.89 0 0 1 0 4.134l-.637.622.011.89a2.89 2.89 0 0 1-2.924 2.924l-.89-.01-.622.636a2.89 2.89 0 0 1-4.134 0l-.622-.637-.89.011a2.89 2.89 0 0 1-2.924-2.924l.01-.89-.636-.622a2.89 2.89 0 0 1 0-4.134l.637-.622-.011-.89a2.89 2.89 0 0 1 2.924-2.924l.89.01.622-.636a2.89 2.89 0 0 1 4.134 0l-.715.698a1.89 1.89 0 0 0-2.704 0l-.92.944-1.32-.016a1.89 1.89 0 0 0-1.911 1.912l.016 1.318-.944.921a1.89 1.89 0 0 0 0 2.704l.944.92-.016 1.32a1.89 1.89 0 0 0 1.912 1.911l1.318-.016.921.944a1.89 1.89 0 0 0 2.704 0l.92-.944 1.32.016a1.89 1.89 0 0 0 1.911-1.912l-.016-1.318.944-.921a1.89 1.89 0 0 0 0-2.704l-.944-.92.016-1.32a1.89 1.89 0 0 0-1.912-1.911z"/>
+            </svg>
+            <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle-fill icons" viewBox="0 0 16 16" id="icon{{ group_number }}">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                    </svg>
+            </div>
+            <hr>
+        {% endfor %}
+    {% endfor %}
+
+        <textarea id="add_remove" name="remove"></textarea>
+        <input type="submit" value="Enregister">
+    </form>
+</div>
+
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+    //$("#addsaidessai466@gmail.com").hide();
+    var button = document.getElementById("addsaidessai466@gmail.com");
+    console.log(button);
+    $(button).hide();
+    //cest ici que jai mis code pour cacher les bouttons de rajout apres suprression
+    var mes_ajout = document.querySelectorAll(".ajoutme");
+    mes_ajout.forEach(function(item){
+        item.style.display = "none";
+    });
+    $("#add_remove").hide();
+    //Ici si lutilisateur s'il clique le boutton pour supprimer
+    $(".rm").click(function(){
+        var mon_id = this.id;
+        $("#add_remove").append(mon_id + ",");
+        let mon_id2 = mon_id.replace("remove", "add");
+        document.getElementById(mon_id2).style.display = "block";
+        $(this).hide();
+        mon_id = mon_id.replace("remove", "");
+        document.getElementById(mon_id).innerHTML = "";
+
+    });
+
+    let mon_boutton_sup = document.querySelectorAll(".sup");
+    mon_boutton_sup.forEach(function(item){
+        item.style.display = "none";
+    });
+
+    //Cest Ici que ce gère le rajout ditem après suppression
+    $(".sup").click(function(){
+
+        var mon_id = this.id;
+        var mon_id2 = mon_id;
+        mon_id = mon_id.replace('add', 'remove');
+        mon_id2 = mon_id2.replace("add", "ajoutem");
+        document.getElementById(mon_id2).style.display = "block";
+        console.log(mon_id);
+        //document.getElementById(mon_id).style.display = "block";
+
+    });
+
+var mes_icones = document.querySelectorAll(".icons");
+mes_icones.forEach(function(item){
+
+    $(item).hide();
+});
+
+var my_students = document.querySelectorAll('.add');
+var mes_entre = document.querySelectorAll(".entre");
+var j=0;
+var i=0;
+
+
+my_students.forEach(function(item){
+    $(item).attr('data-index', i);
+    i++;
+});
+
+mes_entre.forEach(function(item){
+    var nom = "mm" + j;
+    $(item).attr("id", nom);
+    $(item).hide();
+    j++;
+})
+
+});
+/////////////////////////////////////Cest ici que je traite la suppression
+
+
+var mes_elements = document.querySelectorAll('.add');
+mes_elements.forEach(function(item){
+    item.addEventListener("click", function(){
+        var mon_index = $(item).attr("data-index");
+
+        $("#mm"+mon_index).show();
+    });
+
+});
+
+
+var add_line = document.querySelectorAll(".add-line");
+
+add_line.forEach(function(item){
+    item.addEventListener("click", function(){
+        var separation = item.id.split('~');
+        let index_again = separation[1];
+        let mes_etudiants = $("#content"+index_again).html();
+        let mon_ajout = `<li class='list-group-item'><input type='text' name='rajout~${index_again}'</li>`
+        $("#content"+index_again).append(mon_ajout);
+    })
+});
+
+$("#only").on("submit", function(e){
+
+e.preventDefault();
+var form_data = $(this).serialize();
+var mon_cours = document.getElementById("cours").innerHTML;
+var mon_url = `/cours/create/${mon_cours}`;
+
+$.ajax({
+
+type : "POST",
+url : mon_url,
+data : form_data,
+
+success: function(response){
+    console.log("hello world");
+    var les_inputs = document.querySelectorAll(".entre");
+
+    les_inputs.forEach(function(item){
+        $(item).val("");
+    });
+
+    if(response.Confirmation){
+        console.log(response.Confirmation);
+        window.location.href = response.mon_url;
+    };
+
+    if(response.erreur){
+        var suite = response.errno;
+        console.log(response.errno);
+        console.log(response.erreur);
+        $("#icon"+suite).show();
+
+    }
+}
+})
+
+})
+</script>
+
+{% endblock %}

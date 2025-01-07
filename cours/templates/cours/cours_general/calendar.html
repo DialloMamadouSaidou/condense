@@ -1,0 +1,24 @@
+{% extends 'base_user.html' %}
+
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'cours/css/student/calendrier.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h1>Calendar for {{ month }}/{{ year }}</h1>
+    <div>
+        {{ calendar|safe }}
+    </div>
+
+<form method="POST">
+    {% csrf_token %}
+    <div>
+        <label for="month">Entrez le mois</label>
+        <input type="month" id="month" name="month">
+    </div>
+
+    <input type="submit">
+</form>
+{% endblock %}

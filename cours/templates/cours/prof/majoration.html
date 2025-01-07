@@ -1,0 +1,79 @@
+{% extends 'base_user.html' %}
+{% load static %}
+
+{% block css %}
+{% endblock %}
+
+{% block content %}
+
+    <h2>Hello Mamadou Saidou</h2>
+    <h3>Vous devez donné les notes majorantes de vos examen <strong id="name_crs">{{ nom }}</strong></h3>
+
+    <form method="POST" id="form">
+
+        {% for key, value in mes_exam.items %}
+            {% csrf_token %}
+
+            <div>
+                <input type="number" placeholder="Donnez la note majorante de lexamen" name="{{ key }}">
+                <label>{{ key }}</label>
+                <p class="error" id="{{ key }}">{{ key }} doit contenir une note maximale.</p>
+
+            </div>
+
+        {% endfor %}
+
+        <div id="true_error">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" class="bi bi-file-excel-fill" viewBox="0 0 16 16">
+                                <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M5.884 4.68 8 7.219l2.116-2.54a.5.5 0 1 1 .768.641L8.651 8l2.233 2.68a.5.5 0 0 1-.768.64L8 8.781l-2.116 2.54a.5.5 0 0 1-.768-.641L7.349 8 5.116 5.32a.5.5 0 1 1 .768-.64"/>
+                            </svg>
+         <p>Attention à la modification du code source !!!!!</p>
+        </div>
+        <input type="submit" value="soumettre" class="btn btn-info">
+    </form>
+
+{% endblock %}
+{% block js %}
+
+<script type="text/javascript">
+
+let error = document.querySelectorAll(".error");
+error.forEach(function(item){
+   $(item).hide();
+});
+
+$("#true_error").hide();
+
+$("#form").on("submit", function(e){
+        e.preventDefault();
+        var le_crs = document.getElementById("name_crs").innerHTML;
+        console.log(le_crs);
+        var mon_url = `/cours/ponde/${le_crs}`;
+        var mes_data = $(this).serialize();
+        $.ajax({
+            type: "POST",
+            url: mon_url,
+            data: mes_data,
+            success: function(response){
+                console.log("hello world");
+
+                if(response.mon_erreur){
+                    var mes_erreurs = response.mon_erreur;
+                    for(var i=0; i<mes_erreurs.length; i++){
+                        $("#"+mes_erreurs[i]).show();
+                    }
+                    console.log("Vous avez une erreur!")
+                };
+                if(response.mon_url){
+                    window.location.href = response.mon_url;
+                };
+                if(response.error_type){
+                    console.log("le type à  été modifié urgence");
+                    $("#true_error").show();
+                 }
+            }
+        })
+})
+
+</script>
+{% endblock %}

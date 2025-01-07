@@ -1,0 +1,80 @@
+body {
+
+}
+
+#container-total {
+ height: 100vh;
+ display: flex;
+
+
+ border: 5px solid red;
+ margin: auto;
+
+}
+
+#commande {
+    width: 30%;
+    margin: 2px;
+
+    border: 5px solid black;
+
+}
+
+#affichage {
+    width: 70%;
+    border: 5px solid black;
+    margin: 2px;
+
+}
+
+#affiche {
+    display: none;
+
+}
+a {
+    text-decoration: none;
+
+}
+
+table {
+    margin: 15px;
+}
+table, tr, td, th {
+    border: 2px solid black;
+    border-collapse: collapse;
+}
+
+
+tr > th, tr > td {
+    padding: 20px;
+}
+
+.highlight-row {
+
+    font-weight: bold;
+    font-size: 18px;
+    background-color: #f0f0f0;
+}
+
+
+
+.fonctions {
+    color: red;
+}
+@media (max-width: 500px){
+    #commande {
+        display: none;
+    }
+
+
+
+    #affichage{
+        width: 100%;
+        margin: 2px;
+    }
+
+    #affiche {
+    display: block;
+
+    }
+}

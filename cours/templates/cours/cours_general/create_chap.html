@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <title>Create_chap</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="stylesheet" href="{% static 'cours/first_style.css' %}">
+</head>
+<body>
+    <h2>Création d'un chapitre</h2>
+    <!--<h2>{{ contraint }}</h2> -->
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="name">
+            <input type="text" placeholder="Nom du chapitre" id="name" name="name">
+            <label for="name">Nom du Chapitre</label>
+
+            <label for="module">Veuillez choisir votre chapitre</label>
+            <select name="module" id="module">
+                {% for item in module %}
+                    <option>{{ item.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="submit" value="soumettre">
+    </form>
+</body>
+</html>

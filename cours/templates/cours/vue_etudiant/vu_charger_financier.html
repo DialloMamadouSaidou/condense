@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block rep %}
+     <li><a class="dropdown-item" href="#">Saidou</a></li>
+    <li><a class="dropdown-item" href="#">Payer</a></li>
+{% endblock %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'cours/css/charge_financier.css' %}">
+{% endblock %}
+{% block content %}
+            <h3>Vue d'charger financer {{ hello }}</h3>
+            <form method="POST">
+                {% csrf_token %}
+            {% for key, value in note.items %}
+                    <p>{{ key }}</p>
+
+                    <table class="table table-info">
+                     <tr>
+                         <th scope="col">User</th>
+                         <th scope="col">Session</th>
+                         <th scope="col">Somme($)</th>
+                     </tr>
+                {% for item in value %}
+
+                    {% for k, v in item.items %}
+                        <tr>
+                        <td>{{ k }}</td>
+                        {% for i, j in v.items %}
+                            <td>{{ i }}</td>
+                            {% if j != 0 %}
+                            <td><input type="number" value="{{ j }}" name="{{ k }} + {{ i }} + {{ key }}" min="0" max="{{ j }}"></td>
+                            {% else %}
+                                <td><input type="number" value="{{ j }}" name="{{ k }} + {{ i }} + {{ key }}" min="0" max="{{ j }}" readonly disabled></td>
+                            {% endif %}
+                        {% endfor %}
+                        </tr>
+                     {% endfor %}
+
+                {% endfor %}
+            </table>
+
+
+            {% endfor %}
+                <input type="submit" value="enregistrer">
+             </form>
+{% endblock %}

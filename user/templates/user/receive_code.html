@@ -1,0 +1,31 @@
+{% extends "base_user.html" %}
+{% load static %}
+
+{% block content %}
+
+<h2>Modification de Mot de passe</h2>
+
+<form method="POST" class="form">
+    {% csrf_token %}
+    <p>
+        <label for="password">Password</label>
+        <input type="text" id="password" name="password" placeholder="donnez votre password">
+    </p>
+
+    <p>
+        <label for="confirmation">Confirmation</label>
+        <input type="text" id="confirmation" name="confirmation" placeholder="Confirmation">
+    </p>
+    <input type="submit" value="soumettre">
+</form>
+
+{% for key, value in erreur.items %}
+    <p>{{ value }}</p>
+{% endfor %}
+{% for message in messages %}
+    <p>{{ message }}</p>
+{% endfor %}
+<script type="text/javascript">
+
+</script>
+{% endblock %}

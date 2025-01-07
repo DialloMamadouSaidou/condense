@@ -1,0 +1,16 @@
+{% extends 'base_user.html' %}
+
+
+{% block content %}
+
+<h2>Lecture de fichier</h2>
+
+{% if reponse == 1 %}
+<iframe src="{{ link }}" width="800" height="800"></iframe>
+{% else %}
+
+    <h2>Ce pdf nexiste pas</h2>
+
+{% endif %}
+
+{% endblock %}
